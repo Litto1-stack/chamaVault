@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}FAQ{% endblock %}
+{% block content %}
+<h1>Frequently asked questions</h1>
+<section class="card">
+<details class="faq"><summary>Do I need a bank account or an ID?</summary><p>No. Your phone number and a PIN are enough to join, because your group vouches for you.</p></details>
+<details class="faq"><summary>Is real money moving in this version?</summary><p>No. M-Pesa, card and SMS are simulated so you can try everything safely. They sit behind service classes so real Daraja and Africa's Talking can be connected later.</p></details>
+<details class="faq"><summary>Can the treasurer change an entry?</summary><p>No one can edit or delete an entry. The treasurer can add a correction with a written reason; the original stays visible as CORRECTED and everyone gets an SMS.</p></details>
+<details class="faq"><summary>How do I know the ledger has not been tampered with?</summary><p>Open Verify. It recomputes every hash in order and tells you the first record that doesn't match.</p></details>
+<details class="faq"><summary>How is my credit score worked out?</summary><p>Early +15, on time +10, loan installment on schedule +25, a 3-payment streak +20, late -15, missed -40, loan default -100. See My score for the full explanation.</p></details>
+<details class="faq"><summary>What is the difference between flat and reducing-balance interest?</summary><p>Flat adds one fixed percentage to the amount borrowed. Reducing balance charges interest each month only on what you still owe, so it costs less if you repay early.</p></details>
+<details class="faq"><summary>How does the merry-go-round work?</summary><p>Everyone pays the same pot amount each month. Once all have paid, the treasurer pays the whole pot to that month's member, and the turn moves on.</p></details>
+<details class="faq"><summary>Is the election really secret?</summary><p>The app stores that you voted and, separately, a vote for a candidate, and never shows a link between them. This demo database is not hardened against someone with direct database access.</p></details>
+</section>
+{% endblock %}

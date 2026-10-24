@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Loans{% endblock %}
+{% block content %}
+<h1>Loans</h1>
+<p class="muted">Available to lend: <strong>{{ pool|kes }}</strong>.
+  Interest: {{ chama.loan_interest_pct }}% {{ 'flat' if chama.loan_interest_type == 'flat' else 'per month on the reducing balance' }}.
+  Approval: {{ 'treasurer decides' if chama.loan_approval_mode == 'officer' else chama.loan_approval_pct ~ '% of other members must approve' }}.
+  {% if chama.require_guarantor %}A guarantor is required.{% endif %}
+  <a href="{{ url_for('info.tools') }}">Try the loan calculator</a></p>
+
+<form method="post" action="{{ url_for('loans.request_') }}" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>Request a loan</h2>
+  <label for="amount">Amount (KES)</label><input id="amount" name="amount" inputmode="numeric" required>
+  <label for="installments">Monthly installments (1 to 6)</label>
+  <select id="installments" name="installments">{% for n in range(1, 7) %}<option value="{{ n }}" {{ 'selected' if n == 3 }}>{{ n }}</option>{% endfor %}</select>
+  {% if chama.require_guarantor %}
+  <label for="guarantor_id">Guarantor</label>
+  <select id="guarantor_id" name="guarantor_id" required>{% for m in others %}<option value="{{ m.id }}">{{ m.name }} (score {{ m.credit_score }})</option>{% endfor %}</select>
+  <p class="small muted">Your guarantor must accept first. If you default, their score drops too.</p>
+  {% endif %}
+  <button class="btn block" style="margin-top:14px">Send request</button>
+</form>
+
+{% for c in cards %}{% set l = c.loan %}
+<article class="card">
+  <div class="row" style="justify-content: space-between">
+    <div class="who"><span class="avatar" style="background: {{ avatar_color(l.member_id) }}">{{ initials(l.member.name) }}</span><strong>{{ l.member.name }} · {{ l.principal|kes }}</strong></div>
+    <span class="badge {{ {'active':'good','repaid':'good','approved':'good','pending':'pending','rejected':'bad','defaulted':'bad'}[l.status] }}">{{ l.status|capitalize }}</span>
+  </div>
+  <p class="small muted">Total to repay {{ l.total_due|kes }} in {{ l.installments }} × {{ l.installment_amount|kes }}
+    {% if l.guarantor %}· guarantor {{ l.guarantor.first_name }} {{ '✓' if l.guarantor_ok else '(waiting)' }}{% endif %}</p>
+  {% if l.status == 'active' %}
+    <div class="row">{{ charts.ring((l.repaid * 100 / l.total_due)|round|int, 64) }}
+      <p>Repaid {{ l.repaid|kes }} · {{ l.installments_paid }}/{{ l.installments }} installments · next due {{ c.due.strftime('%d %b %Y') }}</p></div>
+  {% endif %}
+  {% if chama.loan_approval_mode == 'vote' %}
+  <p class="small">Votes: {{ c.votes.yes }} approve · {{ c.votes.no }} reject · need {{ c.votes.needed }} of {{ c.votes.eligible }}</p>
+  {% if l.votes %}<div class="small muted">{% for v in l.votes %}{{ v.member.first_name }} {{ '👍' if v.approve else '👎' }}{{ ', ' if not loop.last }}{% endfor %}</div>{% endif %}
+  {% endif %}
+
+  {% if l.status == 'pending' and not l.guarantor_ok and viewer.id == l.guarantor_id %}
+  <form method="post" action="{{ url_for('loans.guarantee', loan_id=l.id) }}" class="row" style="margin-top:10px">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn small" name="choice" value="accept">Accept to guarantee</button>
+    <button class="btn small terra" name="choice" value="decline">Decline</button></form>
+  {% elif l.status == 'pending' and not l.guarantor_ok %}<p class="small">Waiting for the guarantor to accept.</p>
+  {% elif l.status == 'pending' and chama.loan_approval_mode == 'vote' and viewer.id != l.member_id and not c.voted %}
+  <form method="post" action="{{ url_for('loans.vote', loan_id=l.id) }}" class="row" style="margin-top:10px">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn small" name="choice" value="approve">Approve</button>
+    <button class="btn small terra" name="choice" value="reject">Reject</button>
+  </form>
+  {% elif l.status == 'pending' and chama.loan_approval_mode == 'officer' and viewer.role == 'treasurer' and viewer.id != l.member_id %}
+  <form method="post" action="{{ url_for('loans.decide', loan_id=l.id) }}" class="row" style="margin-top:10px">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn small" name="choice" value="approve">Approve as treasurer</button>
+    <button class="btn small terra" name="choice" value="reject">Decline</button></form>
+  {% elif l.status == 'pending' and c.voted %}<p class="small">You voted already.</p>{% endif %}
+
+  {% if l.status == 'approved' and viewer.role == 'treasurer' %}
+  <form method="post" action="{{ url_for('loans.pay_out', loan_id=l.id) }}" class="row" style="margin-top:10px" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="pin" type="password" inputmode="numeric" maxlength="4" placeholder="Treasurer PIN (1234)" style="max-width:200px" required>
+    <button class="btn small">Pay out (mock M-Pesa)</button>
+  </form>
+  {% elif l.status == 'approved' %}<p class="small">Approved. Waiting for the treasurer to pay out.</p>{% endif %}
+
+  {% if l.status == 'active' and viewer.id == l.member_id %}
+  <a class="btn ghost small" href="{{ url_for('pay.pay', item='loan_installment') }}">Pay installment</a>{% endif %}
+</article>
+{% endfor %}
+{% endblock %}

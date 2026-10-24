@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Statement{% endblock %}
+{% block content %}
+<div class="row no-print" style="justify-content: space-between"><h1>Member statement</h1>
+  <button class="btn" type="button" data-print>Print / save as PDF</button></div>
+<section class="card">
+  <h2>{{ chama.name }}</h2>
+  <p><strong>{{ viewer.name }}</strong> · {{ viewer.phone }} · {{ viewer.role }}<br>
+    Issued {{ today.strftime('%d %b %Y') }} · Credit score {{ viewer.credit_score }} ({{ band }})</p>
+  <p>Paid in: <strong>{{ total_in|kes }}</strong> · Paid out: <strong>{{ total_out|kes }}</strong></p>
+  <table>
+    <tr><th>#</th><th>Date</th><th>Type</th><th>Method</th><th style="text-align:right">KES</th></tr>
+    {% for e in entries %}
+    <tr><td>{{ e.id }}</td><td>{{ e.created_at|nairobi('%d %b %Y') }}</td><td>{{ e.type.replace('_', ' ') }}</td><td>{{ e.method }}</td>
+      <td class="num" style="text-align:right">{{ '{:,}'.format(e.amount) }}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+<section class="card">
+  <h2>Verification code</h2>
+  <div class="big num" style="font-size:1.6rem;color:var(--green)">{{ code }}</div>
+  <p class="small muted">Ledger chain status at issue: {{ 'intact ✓' if chain_ok else 'BROKEN ⚠' }}. Anyone can check this code at the verification page. It stops matching if any of this member's records change.</p>
+  <a class="no-print" href="{{ url_for('score.check') }}">Check a statement code →</a>
+</section>
+{% endblock %}

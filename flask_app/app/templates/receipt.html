@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Receipt{% endblock %}
+{% block content %}
+<section class="card" style="text-align:center">
+  <div style="font-size:2.5rem">✅</div>
+  <h1>Payment received</h1>
+  <div class="big num" style="color:var(--green)">{{ e.amount|kes }}</div>
+  <p class="muted">{{ e.member.name }} · {{ e.type.replace('_', ' ')|capitalize }}</p>
+</section>
+<section class="card">
+  <table>
+    <tr><th>Receipt no.</th><td>#{{ e.id }}</td></tr>
+    <tr><th>Date</th><td>{{ e.created_at|nairobi }} (EAT)</td></tr>
+    <tr><th>Method</th><td>{{ e.method|capitalize }}{% if e.ref %} · {{ e.ref }}{% endif %}</td></tr>
+    <tr><th>Recorded by</th><td>{{ e.recorded_by.name }}</td></tr>
+    <tr><th>Group balance</th><td>{{ e.running_balance|kes }}</td></tr>
+    <tr><th>Record fingerprint</th><td class="hash">{{ e.hash }}</td></tr>
+  </table>
+  <p class="small muted">Everyone in the chama has been notified by SMS and the ledger has been updated.</p>
+</section>
+<div class="row no-print">
+  <a class="btn" href="{{ url_for('main.dashboard') }}">Back to home</a>
+  <a class="btn ghost" href="{{ url_for('ledger.ledger') }}">View ledger</a>
+  <button class="btn ghost" type="button" data-print>Print</button>
+</div>
+{% endblock %}

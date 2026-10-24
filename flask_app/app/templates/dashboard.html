@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="card hero">
+  <div class="label">{{ chama.name }} · Pool balance</div>
+  <div class="big num">{{ balance|kes }}</div>
+  <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ pct }}"><span style="width: {{ pct }}%"></span></div>
+  <div class="label">{{ pct }}% of the {{ goal|kes }} goal{% if held %} · includes {{ held|kes }} held for the merry-go-round pot{% endif %}</div>
+</section>
+
+<a class="btn terra block" href="{{ url_for('pay.pay') }}">Make a payment</a>
+{% if mine.status != 'paid' %}
+<p class="muted">{{ viewer.first_name }}, your {{ chama.monthly_amount|kes }} contribution is
+  {% if mine.status == 'overdue' %}<strong>{{ mine.days }} day{{ 's' if mine.days != 1 }} overdue</strong> ({{ mine.owed|kes }} penalty so far){% else %}due on day {{ chama.due_day }}{% endif %}.</p>
+{% endif %}
+
+<div class="tiles">
+  <div class="tile"><span class="t-label">Members</span><span class="t-num">{{ stats.members }}</span></div>
+  <div class="tile"><span class="t-label">On-time payments</span><span class="t-num">{{ stats.on_time_pct }}%</span></div>
+  <div class="tile"><span class="t-label">Total saved in</span><span class="t-num">{{ (stats.pooled / 1000)|round(1) }}K</span></div>
+  <div class="tile"><span class="t-label">Active loans</span><span class="t-num">{{ stats.active_loans }}</span></div>
+</div>
+
+<section class="card">
+  <h2>This month's contributions</h2>
+  <ul class="list">
+    {% for m, s in rows %}
+    <li>
+      <div class="who"><span class="avatar" style="background: {{ avatar_color(m.id) }}" aria-hidden="true">{{ initials(m.name) }}</span>
+        <div><strong>{{ m.name }}</strong> <span class="sub">· {{ m.role }}</span><br>
+        <span class="sub">Score {{ m.credit_score }}
+        {% if s.status == 'overdue' %} · {{ s.days }} day{{ 's' if s.days != 1 }} late, penalty {{ s.owed|kes }} (+{{ s.penalty_per_day|kes }}/day){% endif %}</span></div></div>
+      <span class="badge {{ s.status }}">{{ s.status|capitalize }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% if pot %}
+<section class="card">
+  <div class="row" style="justify-content: space-between"><h2>Merry-go-round</h2><a href="{{ url_for('rotation.rotation') }}">Open →</a></div>
+  <p>This cycle's pot <strong>{{ pot.pot|kes }}</strong> goes to <strong>{{ pot.recipient.name if pot.recipient else '—' }}</strong>.</p>
+  <div class="bar dark"><span style="width: {{ (pot.collected * 100 / pot.pot)|round if pot.pot else 0 }}%"></span></div>
+  <div class="small muted">{{ pot.paid|length }} of {{ stats.members }} members have paid in ({{ pot.collected|kes }} collected)</div>
+</section>
+{% endif %}
+
+<div class="cols">
+  <section class="card"><h2>Pool growth</h2>{{ charts.area_chart(stats.balance_points) }}
+    <div class="small muted">Balance after each ledger entry</div></section>
+  <section class="card"><h2>Collected vs expected</h2>{{ charts.bar_chart(stats.months) }}
+    <div class="small muted"><span class="dot" style="background:var(--green)"></span> collected <span class="dot" style="background:var(--line)"></span> expected</div></section>
+</div>
+
+<section class="card">
+  <h2>Where the money came from</h2>
+  <div class="donut-row">{{ charts.donut(stats.mix) }}
+    <ul class="legend">{% for label, v in stats.mix %}
+      <li><span class="dot" style="background: {{ charts.PALETTE[loop.index0 % 6] }}"></span>{{ label }} <strong class="num">{{ v|kes }}</strong></li>{% endfor %}</ul></div>
+</section>
+
+{% if loan %}
+<section class="card row" style="gap:16px">
+  {{ charts.ring((loan.repaid * 100 / loan.total_due)|round|int) }}
+  <div style="flex:1"><h2>Your active loan</h2>
+    <p>{{ loan.principal|kes }} · repaid {{ loan.repaid|kes }} of {{ loan.total_due|kes }} ({{ loan.installments_paid }}/{{ loan.installments }} installments)</p>
+    <a class="btn ghost small" href="{{ url_for('pay.pay', item='loan_installment') }}">Pay installment</a></div>
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="row" style="justify-content: space-between">
+    <h2>Latest ledger activity</h2>
+    {% if chain.ok %}<a class="badge good" href="{{ url_for('ledger.verify') }}">✓ Ledger verified ({{ chain.count }} records)</a>
+    {% else %}<a class="badge bad" href="{{ url_for('ledger.verify') }}">⚠ Ledger check failed</a>{% endif %}
+  </div>
+  <ul class="list">
+    {% for e in recent %}
+    <li><div class="who"><span class="avatar sm" style="background: {{ avatar_color(e.member_id) }}" aria-hidden="true">{{ initials(e.member.name) }}</span>
+      <div>{{ e.member.first_name }} · {{ e.type.replace('_', ' ') }}<br><span class="sub">{{ e.created_at|nairobi }} · {{ e.method }}</span></div></div>
+      <span class="num {{ 'neg' if e.amount < 0 }}">{{ e.amount|kes }}</span></li>
+    {% endfor %}
+  </ul>
+  <a href="{{ url_for('ledger.ledger') }}">See the full ledger →</a>
+</section>
+{% endblock %}

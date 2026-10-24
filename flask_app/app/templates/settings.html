@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Chama rules{% endblock %}
+{% block content %}
+<h1>Chama rules</h1>
+<p class="muted">Treasurer only. Changes apply from now on, are protected by your PIN, and every member is told by SMS.</p>
+<form method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>Contributions</h2>
+  <label for="monthly_amount">Monthly contribution (KES)</label><input id="monthly_amount" name="monthly_amount" inputmode="numeric" value="{{ chama.monthly_amount }}" required>
+  <label for="goal_amount">Group goal (KES)</label><input id="goal_amount" name="goal_amount" inputmode="numeric" value="{{ chama.goal_amount }}" required>
+  <label for="due_day">Due day of the month (1 to 28)</label><input id="due_day" name="due_day" inputmode="numeric" value="{{ chama.due_day }}" required>
+  <label for="penalty_per_day">Late penalty per day (KES)</label><input id="penalty_per_day" name="penalty_per_day" inputmode="numeric" value="{{ chama.penalty_per_day }}" required>
+
+  <h2 style="margin-top:20px">Loans, with your rules</h2>
+  <label for="loan_interest_type">Interest type</label>
+  <select id="loan_interest_type" name="loan_interest_type">
+    <option value="flat" {{ 'selected' if chama.loan_interest_type == 'flat' }}>Flat (one total % on the amount borrowed)</option>
+    <option value="reducing" {{ 'selected' if chama.loan_interest_type == 'reducing' }}>Reducing balance (% per month on what is left)</option></select>
+  <label for="loan_interest_pct">Interest % (flat: 0 to 100 total · reducing: 0 to 20 per month)</label>
+  <input id="loan_interest_pct" name="loan_interest_pct" inputmode="numeric" value="{{ chama.loan_interest_pct }}" required>
+  <label for="loan_approval_mode">Who approves loans?</label>
+  <select id="loan_approval_mode" name="loan_approval_mode">
+    <option value="vote" {{ 'selected' if chama.loan_approval_mode == 'vote' }}>Member vote</option>
+    <option value="officer" {{ 'selected' if chama.loan_approval_mode == 'officer' }}>Treasurer decides</option></select>
+  <label for="loan_approval_pct">Votes needed (% of other members)</label><input id="loan_approval_pct" name="loan_approval_pct" inputmode="numeric" value="{{ chama.loan_approval_pct }}" required>
+  <label style="font-weight:500"><input type="checkbox" name="require_guarantor" style="width:auto" {{ 'checked' if chama.require_guarantor }}> Require a guarantor for every loan</label>
+
+  <h2 style="margin-top:20px">Merry-go-round</h2>
+  <label for="rotation_amount">Pot contribution per member each month (KES, 0 = off)</label>
+  <input id="rotation_amount" name="rotation_amount" inputmode="numeric" value="{{ chama.rotation_amount }}" required>
+
+  <label for="pin">Your treasurer PIN</label>
+  <input id="pin" name="pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="Demo PIN: 1234">
+  <button class="btn block" style="margin-top:16px">Save rules</button>
+</form>
+{% endblock %}

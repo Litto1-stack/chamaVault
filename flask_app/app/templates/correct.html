@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Correct entry{% endblock %}
+{% block content %}
+<h1>Correct entry #{{ entry.id }}</h1>
+<p class="muted">{{ entry.member.name }} · {{ entry.type.replace('_', ' ') }} · currently <strong>{{ entry.amount|kes }}</strong>.
+  The original stays visible and is marked CORRECTED. A new entry is added and every member gets an SMS.</p>
+<form method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="new_amount">Correct amount (KES)</label>
+  <input id="new_amount" name="new_amount" class="amount-input" inputmode="numeric" value="{{ request.form.get('new_amount', '') }}" required>
+  <label for="reason">Reason (required, 10 to 300 characters)</label>
+  <textarea id="reason" name="reason" rows="3" minlength="10" maxlength="300" required>{{ request.form.get('reason', '') }}</textarea>
+  <label for="pin">Your treasurer PIN</label>
+  <input id="pin" name="pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="Demo PIN: 1234">
+  <button class="btn terra block" style="margin-top:16px">Record correction</button>
+</form>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Demo: M-Pesa webhook{% endblock %}
+{% block content %}
+<h1>Simulate an M-Pesa confirmation</h1>
+<p class="muted">This plays the role of Safaricom calling <code>POST /mpesa/webhook</code>. The payment is matched to a member by phone number.</p>
+<form method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="phone">Phone number</label>
+  <select id="phone" name="phone">{% for m in members %}<option value="{{ m.phone }}">{{ m.name }} · {{ m.phone }}</option>{% endfor %}</select>
+  <label for="amount">Amount (KES)</label><input id="amount" name="amount" inputmode="numeric" value="1500" required>
+  <label for="receipt">M-Pesa receipt code</label><input id="receipt" name="receipt" value="QX{{ range(10000, 99999)|random }}" maxlength="20" required>
+  <label for="account">Pay towards (optional)</label>
+  <select id="account" name="account"><option value="">Auto (contribution if amount matches)</option><option value="savings">Savings</option><option value="welfare">Welfare</option><option value="penalty">Penalty</option><option value="loan_installment">Loan installment</option></select>
+  <button class="btn block" style="margin-top:14px">Send webhook</button>
+</form>
+{% if outcome %}<div class="flash {{ 'ok' if outcome.result in ('recorded', 'duplicate') else 'error' }}">Result: {{ outcome.result }}{% if outcome.reason %} · {{ outcome.reason }}{% endif %}{% if outcome.member %} · {{ outcome.member }} ({{ outcome.type }}){% endif %}</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Ledger{% endblock %}
+{% block content %}
+<h1>Group ledger</h1>
+<p class="muted">Append-only and hash-chained. Entries are never edited or deleted. <a href="{{ url_for('ledger.verify') }}">Verify the chain</a></p>
+{% for e in entries %}
+{% set fix = corrections.get(e.id) %}
+<article class="card ledger-row {{ 'corrected' if fix }}">
+  <div class="row" style="justify-content: space-between">
+    <strong>#{{ e.id }} · {{ e.member.name }}</strong>
+    {% if fix %}<span class="badge corrected">CORRECTED</span>{% elif e.type == 'correction' %}<span class="badge pending">Correction</span>{% endif %}
+  </div>
+  <div class="row" style="justify-content: space-between; align-items: baseline">
+    <span>{{ e.type.replace('_', ' ')|capitalize }} · {{ e.method }}</span>
+    <span class="num {{ 'orig' if fix }}" style="font-size:1.3rem">{{ e.amount|kes }}</span>
+  </div>
+  {% if fix %}<div><strong>Old value:</strong> {{ e.amount|kes }} → <strong>New value:</strong> {{ (e.amount + fix.amount)|kes }}
+    <div class="small">Reason: {{ fix.reason }} (correction #{{ fix.id }}, by {{ fix.recorded_by.name }})</div></div>{% endif %}
+  {% if e.type == 'correction' %}<div class="small">Corrects #{{ e.corrects_id }}: {{ e.reason }}</div>{% endif %}
+  <div class="small muted">{{ e.created_at|nairobi }} · recorded by {{ e.recorded_by.first_name }} · balance {{ e.running_balance|kes }}</div>
+  <div class="hash">prev {{ e.prev_hash[:16] }}… · hash {{ e.hash[:16] }}…</div>
+  {% if viewer.role == 'treasurer' and not fix and e.type != 'correction' %}
+  <a class="small" href="{{ url_for('ledger.correct', entry_id=e.id) }}">Request correction</a>{% endif %}
+</article>
+{% endfor %}
+{% endblock %}

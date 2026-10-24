@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Calculators{% endblock %}
+{% block content %}
+<h1>Money calculators</h1>
+<p class="muted">Plan before you borrow or save. These run on your phone and send nothing anywhere.</p>
+
+<section class="card" id="calc-loan">
+  <h2>Loan calculator</h2>
+  <div class="cols">
+    <div><label for="l-amount">Amount (KES)</label><input id="l-amount" inputmode="numeric" value="10000"></div>
+    <div><label for="l-months">Months</label><input id="l-months" inputmode="numeric" value="4"></div>
+    <div><label for="l-rate">Interest %</label><input id="l-rate" inputmode="decimal" value="{{ chama.loan_interest_pct }}"></div>
+    <div><label for="l-type">Type</label><select id="l-type"><option value="flat" {{ 'selected' if chama.loan_interest_type == 'flat' }}>Flat (total %)</option><option value="reducing" {{ 'selected' if chama.loan_interest_type == 'reducing' }}>Reducing (% per month)</option></select></div>
+  </div>
+  <div class="out"><div class="small muted">Monthly installment</div><div class="num" id="l-pay">–</div>
+    <div class="small">Total to repay <strong id="l-total">–</strong> · interest <strong id="l-int">–</strong></div></div>
+  <table id="l-table" class="small"></table>
+</section>
+
+<section class="card" id="calc-save">
+  <h2>Savings growth</h2>
+  <div class="cols">
+    <div><label for="s-monthly">Save each month (KES)</label><input id="s-monthly" inputmode="numeric" value="1500"></div>
+    <div><label for="s-years">Years</label><input id="s-years" inputmode="numeric" value="5"></div>
+    <div><label for="s-rate">Yearly growth %</label><input id="s-rate" inputmode="decimal" value="8"></div>
+  </div>
+  <div class="out"><div class="small muted">You could have</div><div class="num" id="s-final">–</div>
+    <div class="small">You put in <strong id="s-in">–</strong> · growth <strong id="s-growth">–</strong></div></div>
+  <svg id="s-chart" viewBox="0 0 320 110" class="chart" aria-hidden="true"></svg>
+  <p class="small muted">Illustration only. Real returns vary and are never guaranteed. Not financial advice.</p>
+</section>
+
+<section class="card" id="calc-share">
+  <h2>Year-end share-out</h2>
+  <p class="small muted">When the cycle ends, interest the pool earned is shared by how much each member saved.</p>
+  <div class="cols">
+    <div><label for="h-profit">Interest earned by the pool (KES)</label><input id="h-profit" inputmode="numeric" value="6000"></div>
+    <div><label for="h-group">Everyone's savings (KES)</label><input id="h-group" inputmode="numeric" value="90000"></div>
+    <div><label for="h-mine">My savings (KES)</label><input id="h-mine" inputmode="numeric" value="18000"></div>
+  </div>
+  <div class="out"><div class="small muted">My share of the profit</div><div class="num" id="h-share">–</div></div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/tools.js') }}"></script>{% endblock %}

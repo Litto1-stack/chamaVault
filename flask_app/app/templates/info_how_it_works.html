@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}How it works{% endblock %}
+{% block content %}
+<h1>How ChamaVault works</h1>
+<p class="muted">M-Pesa moves the money. ChamaVault proves it.</p>
+<section class="card"><ol class="steps">
+<li><strong>Join with your phone number.</strong> The treasurer invites you by SMS. No ID upload, no bank account. You pick a 4-digit PIN.</li>
+<li><strong>Agree the rules.</strong> Monthly amount, due day, daily late penalty, loan interest (flat or reducing), who approves loans and whether a guarantor is needed, all set in one place.</li>
+<li><strong>Pay and record.</strong> Members pay by M-Pesa or card; the treasurer records cash with a PIN. Every payment becomes a ledger entry and everyone gets an SMS.</li>
+<li><strong>Prove it.</strong> Each entry is chained to the one before it with a SHA-256 hash. One tap on <a href="{{ url_for('ledger.verify') }}">Verify</a> re-checks the whole history and points to the first broken record.</li>
+<li><strong>Grow your score.</strong> Pay early and on time to build a chama credit score, then use it to borrow from your own group.</li></ol></section>
+<a class="btn" href="{{ url_for('main.dashboard') }}">Back to the dashboard</a>
+{% endblock %}

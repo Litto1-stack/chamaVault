@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Join{% endblock %}
+{% block content %}
+<section class="card" style="text-align:center"><div style="font-size:2.5rem">🤝</div>
+  <h1>Welcome, {{ inv.name.split()[0] }}</h1>
+  <p class="muted">You've been invited to join <strong>{{ chama.name }}</strong>. Choose a 4-digit PIN to approve payments. Never share it.</p></section>
+<form method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="pin">Choose a PIN</label><input id="pin" name="pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required>
+  <label for="pin_confirm">Type it again</label><input id="pin_confirm" name="pin_confirm" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required>
+  <button class="btn terra block" style="margin-top:16px">Join {{ chama.name }}</button>
+</form>
+{% endblock %}

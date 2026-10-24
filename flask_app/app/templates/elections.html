@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Elections{% endblock %}
+{% block content %}
+<h1>Officer elections</h1>
+<p class="muted">Members elect the treasurer by secret ballot. The system records <em>that</em> you voted, never <em>who</em> you voted for. Signatories open and close elections.</p>
+
+{% if viewer.role == 'signatory' and not has_open %}
+<form method="post" action="{{ url_for('elections.open_') }}" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>Open a treasurer election</h2>
+  <p class="small muted">Pick 2 to 4 candidates (signatories can't stand).</p>
+  {% for m in eligible %}<label style="font-weight:500"><input type="checkbox" name="candidates" value="{{ m.id }}" style="width:auto"> {{ m.name }}{% if m.role == 'treasurer' %} (current treasurer){% endif %}</label>{% endfor %}
+  <button class="btn block" style="margin-top:14px">Open election</button>
+</form>
+{% endif %}
+
+{% for c in cards %}{% set e = c.e %}
+<article class="card">
+  <div class="row" style="justify-content: space-between"><h2>Treasurer election #{{ e.id }}</h2>
+    <span class="badge {{ 'pending' if e.status == 'open' else 'good' }}">{{ e.status|capitalize }}</span></div>
+  <p class="small muted">Opened {{ e.created_at|nairobi('%d %b %Y') }} · {{ c.turnout }} of {{ chama.members|length }} members voted</p>
+  <div class="bar dark"><span style="width: {{ (c.turnout * 100 / chama.members|length)|round }}%"></span></div>
+
+  {% if e.status == 'open' %}
+    {% if c.voted %}<p>✓ You have voted. Results show when a signatory closes the election.</p>
+    {% else %}
+    <form method="post" action="{{ url_for('elections.vote', election_id=e.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% for cand in e.candidates %}
+      <label style="font-weight:500"><input type="radio" name="candidate" value="{{ cand.id }}" required style="width:auto">
+        <span class="avatar sm" style="background: {{ avatar_color(cand.member_id) }}">{{ initials(cand.member.name) }}</span> {{ cand.member.name }} <span class="muted small">· score {{ cand.member.credit_score }}</span></label>
+      {% endfor %}
+      <button class="btn" style="margin-top:12px">Cast secret vote</button>
+    </form>{% endif %}
+    {% if viewer.role == 'signatory' %}
+    <form method="post" action="{{ url_for('elections.close', election_id=e.id) }}" style="margin-top:12px">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn ghost small">Close and announce result</button></form>{% endif %}
+  {% else %}
+    <p><strong>Winner: {{ e.winner.name }}</strong></p>
+    {% for cand, n in c.results %}
+    <div class="row" style="justify-content: space-between"><span>{{ cand.member.name }}</span><span class="num">{{ n }} vote{{ 's' if n != 1 }}</span></div>
+    <div class="bar dark"><span style="width: {{ (n * 100 / c.turnout)|round if c.turnout else 0 }}%"></span></div>{% endfor %}
+  {% endif %}
+</article>
+{% else %}<p>No elections yet.</p>{% endfor %}
+{% endblock %}

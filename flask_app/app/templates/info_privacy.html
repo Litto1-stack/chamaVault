@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Privacy{% endblock %}
+{% block content %}
+<h1>Privacy</h1>
+<section class="card">
+<p>This is a demo. Please don't enter real personal or financial information.</p>
+<h2>What we keep</h2>
+<ul><li>Your name, phone number and a hashed PIN (the PIN itself is never stored or logged).</li><li>Your ledger entries, loans, votes, score events and the SMS messages the system "sent".</li></ul>
+<h2>What we never keep</h2>
+<ul><li>Card numbers, expiry dates or CVVs: they are checked for format and discarded.</li><li>ID documents or bank details.</li></ul>
+<h2>Sharing</h2>
+<p>Nothing is sold or shared with third parties. All group members can see the group ledger; that visibility is the point of the product.</p>
+</section>
+{% endblock %}

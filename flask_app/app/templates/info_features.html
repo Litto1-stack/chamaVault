@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Features{% endblock %}
+{% block content %}
+<h1>Features</h1>
+<div class="compare">
+<section class="card"><h2>🏦 Chama (table banking)</h2><ul><li>Pooled monthly contributions</li><li>Loans from the pool, with interest that stays in the pool</li><li>Extra savings and a welfare fund</li><li>Year-end share-out calculator</li></ul><a href="{{ url_for('loans.loans') }}">Loans →</a></section>
+<section class="card"><h2>🎠 Merry-go-round</h2><ul><li>Equal monthly pot contribution from everyone</li><li>One member takes the whole pot each cycle, in order</li><li>The pot is reserved and can't be lent out</li></ul><a href="{{ url_for('rotation.rotation') }}">Merry-go-round →</a></section>
+</div>
+<section class="card"><h2>What is in the app</h2><ul>
+<li><strong>Tamper-evident ledger:</strong> append-only, hash-chained, verifiable, with visible corrections.</li>
+<li><strong>Payments:</strong> M-Pesa (simulated), card (demo, never stored), cash recorded by the treasurer, and a phone-matched M-Pesa webhook.</li>
+<li><strong>Loans with your rules:</strong> flat or reducing interest, optional guarantor, member vote or treasurer approval.</li>
+<li><strong>Elections:</strong> secret-ballot treasurer elections run by the signatories.</li>
+<li><strong>Safety:</strong> quiet SMS alerts to two signatories for unusual activity.</li>
+<li><strong>Reminders:</strong> day-before, due-morning and due-evening SMS.</li>
+<li><strong>Credit score and Vaulti:</strong> a score from your real payment record and a bilingual money coach.</li>
+<li><strong>Tools:</strong> printable statements with verification codes, ledger CSV export, calculators, and an installable app.</li></ul></section>
+{% endblock %}

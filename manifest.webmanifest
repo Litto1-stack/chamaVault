@@ -1,0 +1,17 @@
+{
+  "name": "ChamaVault — Your group, in the clear",
+  "short_name": "ChamaVault",
+  "description": "A transparent digital ledger for your chama.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f2",
+  "theme_color": "#173d32",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

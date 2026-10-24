@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#173d32" />
+    <meta name="description" content="A transparent digital ledger for your chama. M-Pesa moves the money. ChamaVault proves it." />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./extras.css" />
+    <title>ChamaVault — Umoja Sisters</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" aria-label="ChamaVault home">
+          <span class="brand-mark" aria-hidden="true">C<span>V</span></span>
+          <span class="brand-copy">chama<span>vault</span><small>YOUR GROUP, IN THE CLEAR</small></span>
+        </a>
+        <div class="group-switcher">
+          <span class="group-avatar" id="group-avatar">US</span>
+          <span class="group-label"><strong>Umoja Sisters</strong><small>6 members · Active</small></span>
+          <span class="chevron">⌄</span>
+        </div>
+        <div class="nav-heading">YOUR CHAMA</div>
+        <nav class="main-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-view="dashboard"><span class="nav-icon">◫</span>Overview</button>
+          <button class="nav-item" data-view="pay"><span class="nav-icon">＋</span>Make a payment</button>
+          <button class="nav-item" data-view="ledger"><span class="nav-icon">▤</span>Full ledger <span class="nav-count" id="ledger-count">12</span></button>
+          <button class="nav-item" data-view="members"><span class="nav-icon">♧</span>Members</button>
+          <button class="nav-item" data-view="loans"><span class="nav-icon">↗</span>Loans &amp; votes</button>
+          <button class="nav-item" data-view="vaulti"><span class="nav-icon">✳</span>Ask Vaulti</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="secure-note"><span>◈</span><div><strong>Every record, visible.</strong><small>Nothing gets erased in the dark.</small></div></div>
+          <button class="profile-button"><span class="avatar avatar-dark">K</span><span><strong id="profile-name">Kamau N.</strong><small>Treasurer</small></span><span class="profile-more">···</span></button>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" aria-label="Open navigation">☰</button>
+          <div class="breadcrumb">Your chama <span>/</span> <strong id="page-title">Overview</strong></div>
+          <div class="topbar-actions">
+            <span class="demo-pill"><i></i> LIVE DEMO</span>
+            <button class="icon-button" id="open-outbox" aria-label="View SMS outbox">♧<b id="sms-badge">3</b></button>
+            <button class="help-button" id="help-button">?</button>
+          </div>
+        </header>
+
+        <section class="content-wrap">
+          <section class="view-panel active-view" id="view-dashboard">
+            <div class="welcome-row">
+              <div><div class="eyebrow"><span class="eyebrow-dot"></span> YOUR GROUP IS IN GOOD SHAPE</div><h1>Habari, <span id="welcome-name">Kamau</span> <span class="wave">✳</span></h1><p class="welcome-sub">Here’s what’s happening with <strong>Umoja Sisters</strong> today.</p></div>
+              <div class="welcome-actions"><button class="button button-green" data-open-pay><span>＋</span> Make a payment</button><button class="button button-outline" id="invite-button"><span>＋</span> Invite a member</button></div>
+            </div>
+
+            <div class="hero-card">
+              <div class="hero-main">
+                <div class="hero-label">TOTAL SAVED THIS CYCLE <span class="hero-live"><i></i> UPDATED JUST NOW</span></div>
+                <div class="hero-total"><span>KES</span><strong id="group-total">4,000</strong></div>
+                <div class="goal-row"><span id="goal-label">KES 4,000 of KES 8,000 goal</span><span id="goal-percent">50%</span></div>
+                <div class="progress-track"><span id="goal-progress" style="width:50%"></span></div>
+                <div class="hero-foot"><span><b id="paid-count">4</b> of <b id="member-count">6</b> members contributed</span><span class="hero-cycle">OCTOBER CYCLE <span>↗</span></span></div>
+              </div>
+              <div class="hero-illustration"><img class="hero-photo" src="./images/hero.jpg" alt="Hands holding a glass jar of coins with a young plant growing out of it" width="1000" height="667" fetchpriority="high" /></div>
+            </div>
+
+            <div class="quick-stats">
+              <article class="stat-card"><div class="stat-top"><span class="stat-icon sage">✓</span><span class="stat-label">CONTRIBUTED</span></div><div class="stat-value"><span id="on-time-count">4</span><small> / <span id="contribution-denom">6</span> members</small></div><div class="stat-caption">This contribution cycle</div></article>
+              <article class="stat-card"><div class="stat-top"><span class="stat-icon peach">◷</span><span class="stat-label">STILL TO COME</span><span class="stat-label muted">THIS CYCLE</span></div><div class="stat-value"><span id="pending-count">2</span><small> members</small></div><div class="stat-caption" id="outstanding-caption">KES 2,000 outstanding</div></article>
+              <article class="stat-card"><div class="stat-top"><span class="stat-icon rose">!</span><span class="stat-label">NEEDS A NUDGE</span><span class="alert-dot"></span></div><div class="stat-value"><span id="overdue-count">1</span><small> member overdue</small></div><div class="stat-caption"><button class="text-button" id="remind-overdue">Send a gentle reminder →</button></div></article>
+              <article class="stat-card score-card"><div class="stat-top"><span class="stat-icon gold">✳</span><span class="stat-label">YOUR CREDIT SCORE</span><span class="score-tag" id="score-level">GOOD</span></div><div class="stat-value"><span id="credit-score">640</span><small> / 850</small></div><div class="score-meter"><span id="score-meter" style="width:68%"></span></div><div class="stat-caption" id="score-explanation">Your score is 640 (Good). You’re building a solid history.</div></article>
+            </div>
+
+            <div class="dashboard-grid">
+              <section class="surface members-surface">
+                <div class="section-heading"><div><h2>This month’s contributions</h2><p>Everyone can see every shilling.</p></div><button class="link-button" data-goto="ledger">Full ledger <span>→</span></button></div>
+                <div class="member-list" id="dashboard-members"></div>
+                <button class="record-button" id="record-payment"><span>＋</span> Record a cash payment</button>
+              </section>
+              <section class="surface activity-surface">
+                <div class="section-heading"><div><h2>Recent activity</h2><p>Every action leaves a trace.</p></div><button class="more-button" aria-label="More activity">···</button></div>
+                <div class="activity-list" id="recent-activity"></div>
+                <div class="integrity-note"><span>◈</span><div><strong>Protected by the whole group</strong><small>Corrections stay visible to everyone.</small></div></div>
+              </section>
+            </div>
+            <div class="bottom-callout"><span class="callout-icon">✳</span><div><strong>Need a little money guidance?</strong><small>Vaulti knows your chama and your goals. Ask away, in English or Kiswahili.</small></div><button class="button button-green" data-goto="vaulti">Chat with Vaulti <span>→</span></button></div>
+          </section>
+
+          <section class="view-panel" id="view-ledger">
+            <div class="page-heading"><div><div class="eyebrow">OPEN BOOKS, ALWAYS</div><h1>The full ledger</h1><p>Every contribution has a timestamp, a name, and a shared record.</p></div><button class="button button-green" id="ledger-record"><span>＋</span> Record payment</button></div>
+            <div class="ledger-summary"><div><small>GROUP BALANCE</small><strong id="ledger-balance">KES 4,000</strong></div><div><small>THIS CYCLE</small><strong>October 2026</strong></div><div><small>RECORDS</small><strong id="record-count">6 entries</strong></div><div class="verified"><span>◈</span> SHARED WITH ALL MEMBERS</div></div>
+            <div class="surface pad chain-panel" id="chain-panel"></div>
+            <div class="surface ledger-surface"><div class="ledger-toolbar"><strong>Transaction history</strong><span>Newest first</span></div><div class="ledger-table-wrap"><table><thead><tr><th>MEMBER / DETAILS</th><th>DATE & TIME</th><th>METHOD</th><th>RECORDED BY</th><th>AMOUNT</th><th>STATUS</th><th></th></tr></thead><tbody id="ledger-rows"></tbody></table></div></div>
+            <div class="ledger-footnote"><span>◈</span> Ledger entries can’t be deleted. If something needs fixing, a correction is added alongside the original for everyone to see.</div>
+          </section>
+
+          <section class="view-panel" id="view-members">
+            <div class="page-heading"><div><div class="eyebrow">SIX SISTERS, ONE SHARED GOAL</div><h1>Your members</h1><p>Progress, contribution status, and credit health — all in one place.</p></div><div class="welcome-actions"><button class="button button-outline" id="statement-open">Statement</button><button class="button button-green" id="members-invite"><span>＋</span> Invite a member</button></div></div>
+            <div class="surface directory-surface"><div class="directory-head"><strong>Group directory</strong><span id="directory-cycle">OCTOBER CONTRIBUTION · KES 1,000</span></div><div id="member-directory"></div></div>
+            <div class="page-footnote">Credit scores are private to each member. Group contribution records are visible to everyone.</div>
+          </section>
+
+          <section class="view-panel" id="view-pay">
+            <div class="page-heading"><div><div class="eyebrow">PAY IN A MINUTE</div><h1>Make a payment</h1><p>Contributions, penalties, loan installments, savings and welfare.</p></div></div>
+            <div id="pay-content"></div>
+          </section>
+
+          <section class="view-panel" id="view-loans">
+            <div class="page-heading"><div><div class="eyebrow">ACCOUNTABILITY GOES BOTH WAYS</div><h1>Loans &amp; votes</h1><p>Requests are shared with the group. Members decide together.</p></div><button class="button button-green" id="loan-request"><span>＋</span> Request a loan</button></div>
+            <div class="surface pad" id="loan-rules"></div>
+            <div class="loan-column" id="loan-column" style="margin-top:15px"></div>
+          </section>
+
+          <section class="view-panel" id="view-vaulti">
+            <div class="page-heading vaulti-page-heading"><div><div class="eyebrow">YOUR FRIENDLY FINANCIAL COACH</div><h1>Talk to Vaulti <span class="wave">✳</span></h1><p>Here for the money questions you’ve been meaning to ask.</p></div><span class="language-pill">EN · SW</span></div>
+            <div class="chat-layout surface"><div class="chat-header"><span class="vaulti-avatar">✳</span><div><strong>Vaulti</strong><small><i></i> Your chama coach · online</small></div><button id="sms-coach" class="chat-sms-button">SMS mode</button></div><div class="chat-messages" id="chat-messages"><div class="chat-day">TODAY · OCTOBER CYCLE</div><div class="message-row"><span class="vaulti-avatar small">✳</span><div class="bubble-wrap"><div class="chat-bubble" id="coach-welcome">Habari Kamau! I’m here for you. Your score is 640 — a good foundation. What’s on your mind? You can ask me about saving, chama rules, loans, or anything money-related.</div><small>Vaulti · just now</small></div></div></div><div class="suggested-questions"><button>How do I improve my score?</button><button>What is a money market fund?</button><button>Help me make a budget</button></div><form class="chat-input-row" id="chat-form"><input id="chat-input" autocomplete="off" placeholder="Ask Vaulti anything…" aria-label="Message Vaulti" /><button type="submit" aria-label="Send message">↑</button></form><div class="chat-disclaimer">Vaulti gives general guidance, not financial advice. Your information stays with your chama.</div></div>
+            <div class="vaulti-personal"><span class="stat-icon gold">✳</span><span><strong>A little about your chama</strong><small id="vaulti-personal-data">6 members · KES 1,000 monthly · Your score: 640 · You’re on a 2-month on-time streak.</small></span></div>
+          </section>
+
+        </section>
+      </main>
+
+      <aside class="outbox" id="outbox" aria-label="SMS outbox">
+        <div class="outbox-head"><div><span class="outbox-signal"><i></i></span><strong>SMS outbox</strong><span class="outbox-live">DEMO</span></div><button id="close-outbox" aria-label="Close outbox">×</button></div>
+        <p class="outbox-caption">Messages sent by ChamaVault appear here.</p>
+        <div class="outbox-actions"><button id="trigger-reminder">↻ Trigger reminder now</button><button id="trigger-mpesa">⇢ Simulate M-Pesa</button></div>
+        <div class="outbox-list" id="outbox-list"></div>
+        <div class="outbox-footer"><span>◈</span> SMS simulator · No messages leave this demo</div>
+      </aside>
+      <div class="toast-region" id="toast-region" aria-live="polite"></div>
+    </div>
+
+    <div class="modal-backdrop" id="modal-backdrop" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" id="modal-close" aria-label="Close">×</button><div id="modal-content"></div></section></div>
+    <script src="./app.js"></script>
+    <script src="./chain.js"></script>
+    <script src="./extras.js"></script>
+    <script>if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(error => console.error('Offline support could not be enabled.', error)));</script>
+  </body>
+</html>

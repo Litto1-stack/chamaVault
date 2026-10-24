@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}SMS outbox{% endblock %}
+{% block content %}
+<h1>SMS outbox</h1>
+<p class="muted">Every message the system "sent" (mock service, nothing leaves this app). {{ messages|length }} shown.</p>
+{% for s in messages %}
+<div class="sms">
+  <div class="meta"><span>To {{ s.member.name if s.member else s.to_phone }} · {{ s.to_phone }}</span>
+    <span><span class="badge">{{ s.kind.replace('_', ' ') }}</span> <span class="badge good">{{ s.status }}</span> {{ s.created_at|nairobi }}</span></div>
+  <div>{{ s.body }}</div>
+</div>
+{% else %}<p>No messages yet.</p>{% endfor %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{
+  "name": "ChamaVault",
+  "short_name": "ChamaVault",
+  "description": "M-Pesa moves the money. ChamaVault proves it.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f1e8",
+  "theme_color": "#1f6f4a",
+  "icons": [{ "src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

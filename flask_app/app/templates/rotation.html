@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Merry-go-round{% endblock %}
+{% block content %}
+<h1>Merry-go-round</h1>
+{% if not enabled %}
+<section class="card"><p>Your chama isn't running a merry-go-round yet. In this model every member pays the same amount each month, and one member takes the whole pot, in turn, until everyone has had a turn.</p>
+  {% if viewer.role == 'treasurer' %}<a class="btn" href="{{ url_for('members.settings') }}">Turn it on in Chama rules</a>
+  {% else %}<p class="muted small">Ask the treasurer to switch it on in Chama rules.</p>{% endif %}</section>
+{% else %}
+<section class="card hero">
+  <div class="label">This cycle ({{ period }}) · pot goes to</div>
+  <div class="big">{{ status.recipient.name }}</div>
+  <div class="label">{{ status.pot|kes }} pot · each member pays {{ amount|kes }} · {{ status.collected|kes }} collected</div>
+  <div class="bar"><span style="width: {{ (status.collected * 100 / status.pot)|round }}%"></span></div>
+</section>
+<div class="pot-seats" aria-label="Rotation order">
+  {% for s in seats %}
+  <div class="seat {{ 'paid' if s.paid }} {{ 'now' if s.now }}"><span class="avatar" style="background: {{ avatar_color(s.member.id) }}">{{ initials(s.member.name) }}</span>
+    <span>{{ s.member.first_name }}</span><span class="muted">{{ 'receives now' if s.now else ('turn ' ~ (s.turn + 1)) }}</span><span>{{ '✓ paid' if s.paid else 'not paid' }}</span></div>
+  {% endfor %}
+</div>
+{% if not mine_paid %}<a class="btn terra block" href="{{ url_for('pay.pay', item='rotation') }}">Pay my {{ amount|kes }} into the pot</a>{% else %}<p>✓ You have paid into this cycle's pot.</p>{% endif %}
+
+{% if status.paid_out %}<div class="flash ok">This cycle's pot has been paid out.</div>
+{% elif viewer.role == 'treasurer' %}
+<form method="post" action="{{ url_for('rotation.payout') }}" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>Pay out the pot</h2><p class="small muted">Available once all {{ seats|length }} members have paid in.</p>
+  <input name="pin" type="password" inputmode="numeric" maxlength="4" placeholder="Treasurer PIN (1234)" required>
+  <button class="btn block" style="margin-top:10px" {{ 'disabled' if not status.complete }}>Pay {{ status.pot|kes }} to {{ status.recipient.first_name }}</button>
+</form>{% endif %}
+<p class="small muted">The pot sits in the group ledger but is reserved: it can't be lent out as loans.</p>
+{% endif %}
+{% endblock %}

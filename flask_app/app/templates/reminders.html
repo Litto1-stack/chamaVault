@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Reminders{% endblock %}
+{% block content %}
+<h1>Reminders</h1>
+<p class="muted">Scheduled automatically (Africa/Nairobi time). Contribution due day is day {{ chama.due_day }} of each month.</p>
+<section class="card">
+  <ul class="list">
+    {% for key, (label, who) in kinds.items() %}
+    <li><div><strong>{{ label }}</strong><br><span class="sub">Goes to: {{ who }}</span></div>
+      {% if viewer.role == 'treasurer' %}
+      <form method="post" action="{{ url_for('sms.trigger') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="kind" value="{{ key }}"><button class="btn small">Trigger now</button></form>{% endif %}
+    </li>
+    {% endfor %}
+    <li><div><strong>Nightly checks (00:05)</strong><br><span class="sub">Marks months missed after 7 days overdue (-40) and defaults stale loans (-100)</span></div>
+      {% if viewer.role == 'treasurer' %}
+      <form method="post" action="{{ url_for('sms.trigger') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="kind" value="daily_checks"><button class="btn small ghost">Run now</button></form>{% endif %}
+    </li>
+  </ul>
+  {% if viewer.role != 'treasurer' %}<p class="small muted">Switch to the treasurer in "Viewing as" to use the demo triggers.</p>{% endif %}
+</section>
+<a href="{{ url_for('sms.outbox') }}">See sent messages →</a>
+{% endblock %}

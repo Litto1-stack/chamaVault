@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}My score{% endblock %}
+{% block content %}
+<h1>{{ viewer.first_name }}'s chama score</h1>
+<section class="card" style="text-align:center">
+  {{ charts.gauge(viewer.credit_score, lo, hi) }}
+  <div><span class="badge {{ 'good' if viewer.credit_score >= 600 else 'pending' if viewer.credit_score >= 500 else 'bad' }}">{{ band }}</span>
+    · streak {{ viewer.streak }} on-time payment{{ 's' if viewer.streak != 1 }}</div>
+  <div class="small muted">Scale {{ lo }} to {{ hi }}. New members start at 500.</div>
+</section>
+
+<section class="card">
+  <h2>How your score works</h2>
+  <p class="muted">Your score is built only from how you pay your chama. It goes up when you are reliable and early, and down when you are late or miss payments.</p>
+  <ul class="list">
+    {% for pts, text in rules %}
+    <li><span>{{ text }}</span><span class="num badge {{ 'good' if pts > 0 else 'bad' }}">{{ '%+d' % pts }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="card">
+  <h2>Recent changes</h2>
+  <ul class="list">
+    {% for e in events %}<li><div>{{ e.reason }}<br><span class="sub">{{ e.created_at|nairobi('%d %b %Y') }}</span></div>
+      <span class="num badge {{ 'good' if e.delta > 0 else 'bad' }}">{{ '%+d' % e.delta }}</span></li>
+    {% else %}<li>No changes yet. Pay on time to start building your score.</li>{% endfor %}
+  </ul>
+</section>
+<a class="btn" href="{{ url_for('score.statement') }}">View my statement</a>
+{% endblock %}
+

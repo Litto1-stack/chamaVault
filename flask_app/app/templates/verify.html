@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Verify ledger{% endblock %}
+{% block content %}
+<h1>Ledger verification</h1>
+{% if result.ok %}
+<section class="card" style="text-align:center">
+  <div style="font-size:2.5rem">✅</div>
+  <h2>Chain intact</h2>
+  <p>All {{ result.count }} records re-checked. Every hash and running balance matches.</p>
+  <div class="small muted">Latest fingerprint</div><div class="hash">{{ result.tip }}</div>
+</section>
+{% else %}
+<section class="card" style="border-color: var(--terra)">
+  <div style="font-size:2.5rem">⚠️</div>
+  <h2>Chain broken at record #{{ result.broken_id }}</h2>
+  <p>{{ result.reason }}</p>
+  <p class="small muted">Records after #{{ result.broken_id }} can't be trusted until this is explained. Alert a signatory.</p>
+</section>
+{% endif %}
+<p class="muted small">Each record's hash = SHA-256 of its fields plus the previous record's hash. Changing anything in the past changes every hash after it.</p>
+{% endblock %}

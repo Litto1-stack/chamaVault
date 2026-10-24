@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Make a payment{% endblock %}
+{% block content %}
+<h1>Make a payment</h1>
+<p class="muted">Paying as <strong>{{ viewer.name }}</strong></p>
+<form id="pay-form" method="post" class="card" autocomplete="off" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <label for="item">1. What are you paying for?</label>
+  <select id="item" name="item">
+    {% for i in items %}
+    <option value="{{ i.key }}" data-amount="{{ i.amount }}" data-editable="{{ 1 if i.editable else 0 }}" data-max="{{ i.max or '' }}"
+            {{ 'selected' if i.key == selected }}>{{ i.label }}{% if not i.editable %} ({{ i.amount|kes }}){% endif %}</option>
+    {% endfor %}
+  </select>
+
+  <label for="amount">2. Amount (KES)</label>
+  <input id="amount" name="amount" class="amount-input" inputmode="numeric" pattern="[0-9]*" required
+         value="{{ request.form.get('amount', '') }}" data-keep="{{ request.form.get('amount', '') }}">
+  <div class="small muted" id="amount-hint"></div>
+
+  <label>3. Pay with</label>
+  <div class="tabs">
+    <label><input type="radio" name="method" value="mpesa" {{ 'checked' if request.form.get('method', 'mpesa') == 'mpesa' }}><span>📱 M-Pesa</span></label>
+    <label><input type="radio" name="method" value="card" {{ 'checked' if request.form.get('method') == 'card' }}><span>💳 Card</span></label>
+  </div>
+
+  <div id="mpesa-box">
+    <p class="small muted">We'll send a simulated STK push to <strong>{{ viewer.phone }}</strong>. Enter your M-Pesa PIN as you would on your phone.</p>
+    <label for="mpesa_pin">M-Pesa PIN</label>
+    <input id="mpesa_pin" name="mpesa_pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" placeholder="Demo PIN: 1234">
+  </div>
+
+  <div id="card-box" class="hidden">
+    <div class="demo-note">Demo only. Card details are checked for format and are never stored or logged. Don't enter a real card.</div>
+    <label for="card_name">Name on card</label><input id="card_name" name="card_name" maxlength="60" autocomplete="off">
+    <label for="card_number">Card number</label><input id="card_number" name="card_number" inputmode="numeric" maxlength="23" autocomplete="off" placeholder="13 to 19 digits">
+    <div class="row">
+      <div style="flex:1"><label for="card_expiry">Expiry (MM/YY)</label><input id="card_expiry" name="card_expiry" maxlength="5" autocomplete="off" placeholder="08/29"></div>
+      <div style="flex:1"><label for="card_cvv">CVV</label><input id="card_cvv" name="card_cvv" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></div>
+    </div>
+  </div>
+
+  <button class="btn terra block" style="margin-top:18px">Pay now</button>
+</form>
+{% endblock %}

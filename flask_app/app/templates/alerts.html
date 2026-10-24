@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Signatory alerts{% endblock %}
+{% block content %}
+<h1>Signatory alerts</h1>
+<p class="muted">Rule-based flags. Both signatories also receive a quiet SMS. A flag is a prompt to look, not proof of wrongdoing.</p>
+{% for f in flags %}
+<article class="card"><span class="badge bad">{{ f.rule.replace('_', ' ') }}</span> <span class="small muted">{{ f.created_at|nairobi }}</span>
+  <p>{{ f.detail }}</p></article>
+{% else %}<p>No alerts. Everything looks normal.</p>{% endfor %}
+{% endblock %}

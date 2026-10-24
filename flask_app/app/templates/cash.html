@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Record cash{% endblock %}
+{% block content %}
+<h1>Record a cash payment</h1>
+<p class="muted">Treasurer only. Your PIN is required and is never stored in plain text or logged.</p>
+<form id="cash-form" method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="member_id">Member</label>
+  <select id="member_id" name="member_id">{% for m in members %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}</select>
+  <label for="item">Paying for</label>
+  <select id="item" name="item"></select>
+  <label for="amount">Amount received (KES)</label>
+  <input id="amount" name="amount" inputmode="numeric" class="amount-input" required>
+  <label for="pin">Your treasurer PIN</label>
+  <input id="pin" name="pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="Demo PIN: 1234">
+  <button class="btn block" style="margin-top:16px">Record cash</button>
+</form>
+<script type="application/json" id="cash-options">{{ options|tojson }}</script>
+{% endblock %}

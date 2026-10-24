@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Check statement{% endblock %}
+{% block content %}
+<h1>Check a statement code</h1>
+<form method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="member_id">Member named on the statement</label>
+  <select id="member_id" name="member_id">{% for m in members %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}</select>
+  <label for="code">Verification code</label>
+  <input id="code" name="code" placeholder="CV-XXXX-XXXX-XXXX" maxlength="20" required>
+  <button class="btn block" style="margin-top:14px">Check</button>
+</form>
+{% if result is not none %}
+<div class="flash {{ 'ok' if result else 'error' }}">{{ '✓ Genuine: this code matches the live ledger records for this member.' if result else '✗ No match. The statement may be altered or out of date.' }}</div>
+{% endif %}
+{% endblock %}
