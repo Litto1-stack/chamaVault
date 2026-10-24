@@ -36,6 +36,9 @@ def request_():
 @bp.post("/loans/<int:loan_id>/vote")
 def vote(loan_id):
     loan = db.get_or_404(Loan, loan_id)
+    if loan.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     choice = request.form.get("choice")
     try:
         if choice not in ("approve", "reject"):
@@ -51,6 +54,9 @@ def vote(loan_id):
 @role_required("treasurer")
 def pay_out(loan_id):
     loan = db.get_or_404(Loan, loan_id)
+    if loan.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     error = check_pin(g.viewer, request.form.get("pin"))
     if error is None:
         try:
@@ -66,6 +72,9 @@ def pay_out(loan_id):
 @bp.post("/loans/<int:loan_id>/guarantee")
 def guarantee(loan_id):
     loan = db.get_or_404(Loan, loan_id)
+    if loan.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     try:
         accept = request.form.get("choice") == "accept"
         answer_guarantee(loan, g.viewer, accept)
@@ -79,6 +88,9 @@ def guarantee(loan_id):
 @role_required("treasurer")
 def decide(loan_id):
     loan = db.get_or_404(Loan, loan_id)
+    if loan.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     try:
         officer_decide(loan, g.viewer, request.form.get("choice") == "approve")
         flash("Decision recorded and everyone notified.", "ok")

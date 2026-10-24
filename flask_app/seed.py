@@ -10,12 +10,13 @@ from app import create_app
 from app import scoring
 from app.extensions import db
 from app.ledger import append_entry
-from app.models import Chama, Loan, LoanVote, Member, PersonalGoal, RotationSlot
+from app.models import Account, Chama, Loan, LoanVote, Member, PersonalGoal, RotationSlot
 from app.payments import group_sms_text, period_of
 from app.services.sms import notify_all
 from app.timeutil import nairobi_to_utc, today_nairobi
 
 DEMO_PIN = "1234"
+DEMO_PASSWORD = "Demo1234"
 MONTHLY, GOAL, PENALTY, ROTATION = 1500, 50_000, 50, 500
 
 # name, phone, role, days relative to the due date for months -4..0 (negative = early, None = unpaid)
@@ -56,6 +57,10 @@ def seed_demo(today: date | None = None):
         members[name] = Member(chama_id=chama.id, name=name, phone=phone, role=role, pin_hash=pin_hash)
     db.session.add_all(members.values())
     db.session.flush()
+    for member in members.values():
+        email = f"demo+{member.phone[-4:]}@chamavault.local"
+        member.email = email
+        db.session.add(Account(email=email, password_hash=generate_password_hash(DEMO_PASSWORD), member_id=member.id))
     for pos, (name, *_rest) in enumerate(MEMBERS):
         db.session.add(RotationSlot(chama_id=chama.id, member_id=members[name].id, position=pos))
     treasurer = members["Mary Njeri"]
@@ -133,4 +138,4 @@ def seed_demo(today: date | None = None):
 if __name__ == "__main__":
     with create_app().app_context():
         seed_demo()
-        print("Seeded Umoja Sisters. Demo PIN for every member: " + DEMO_PIN)
+        print(f"Seeded Umoja Sisters. Demo account password: {DEMO_PASSWORD}; transaction PIN: {DEMO_PIN}")

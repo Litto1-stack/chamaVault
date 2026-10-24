@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}ChamaVault · A clearer way to save together{% endblock %}
+{% block content %}
+<section class="landing-hero">
+  <div class="landing-copy">
+    <p class="eyebrow">GROUP SAVINGS, WITH EVERYONE IN VIEW</p>
+    <h1>Build trust into every contribution.</h1>
+    <p>Keep your chama's contributions, loans, goals and decisions together in one shared record.</p>
+    <div class="landing-actions"><a class="btn" href="{{ url_for('auth.signup') }}">Create your chama</a><a class="btn ghost" href="{{ url_for('auth.login') }}">Sign in</a></div>
+    <small>Made for Kenyan savings groups. KES-first, mobile-ready, and clear about every change.</small>
+  </div>
+  <div class="landing-ledger" aria-label="Example chama ledger summary">
+    <div class="ledger-mark"><span>CV</span><span>SHARED LEDGER</span></div>
+    <div class="ledger-total"><small>THIS CYCLE</small><strong>KES 12,500</strong><span>5 contributions recorded</span></div>
+    <div class="ledger-line"><span><i class="ledger-dot green"></i>Contribution received</span><strong>+ KES 1,500</strong></div>
+    <div class="ledger-line"><span><i class="ledger-dot orange"></i>Loan installment</span><strong>+ KES 2,750</strong></div>
+    <div class="ledger-stamp">APPEND-ONLY · VERIFIABLE</div>
+  </div>
+</section>
+<section class="landing-proof">
+  <div><strong>Every entry</strong><span>Visible to members</span></div>
+  <div><strong>Every correction</strong><span>Original stays in the record</span></div>
+  <div><strong>Every decision</strong><span>Tracked with your group rules</span></div>
+</section>
+<section class="landing-services">
+  <div><p class="eyebrow">ONE PLACE FOR THE WORK</p><h2>Your group’s everyday tools, connected.</h2></div>
+  <div class="landing-service-grid">
+    <article><span>01</span><h3>Contributions & ledger</h3><p>Track payments, balances and corrections in a shared history.</p></article>
+    <article><span>02</span><h3>Loans & group votes</h3><p>Set group rules, request loans and record member decisions.</p></article>
+    <article><span>03</span><h3>Goals & money guidance</h3><p>Plan savings together and ask Vaulti practical questions.</p></article>
+  </div>
+</section>
+<p class="landing-caveat">Payment, SMS and card actions are demo simulations unless you connect and configure their providers.</p>
+{% endblock %}

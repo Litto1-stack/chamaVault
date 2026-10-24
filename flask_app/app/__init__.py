@@ -2,6 +2,7 @@
 import os
 
 from flask import Flask, g, render_template
+from sqlalchemy import inspect, text
 
 from config import Config
 from .extensions import csrf, db
@@ -18,19 +19,24 @@ def create_app(config_class=Config):
 
     from .services.mpesa import MockMpesaService
     from .services.sms import MockSmsService
-    from .services.vaulti import LlmCoach, LocalFaqCoach
+    from .services.vaulti import LlmCoach, LocalFaqCoach, OpenRouterCoach
     app.extensions["sms_service"] = MockSmsService()
     app.extensions["mpesa_service"] = MockMpesaService()
     local = LocalFaqCoach()
-    app.extensions["vaulti_coach"] = LlmCoach(local) if app.config["VAULTI_BACKEND"] == "llm" else local
+    backend = app.config["VAULTI_BACKEND"]
+    app.extensions["vaulti_coach"] = (
+        OpenRouterCoach(local) if backend == "openrouter" else
+        LlmCoach(local) if backend == "llm" else local
+    )
 
     from . import models  # noqa: F401  (registers tables)
-    from .auth import load_viewer
+    from .auth import load_viewer, require_account_login
     from .routes import all_blueprints
     for bp in all_blueprints:
         app.register_blueprint(bp)
 
     app.before_request(load_viewer)
+    app.before_request(require_account_login)
     from . import charts
     app.jinja_env.globals.update(charts=charts, initials=charts.initials, avatar_color=charts.avatar_color)
     app.jinja_env.filters["kes"] = kes
@@ -38,8 +44,8 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def inject_globals():
-        from .models import Chama
-        return {"viewer": g.get("viewer"), "chama": Chama.query.first()}
+        viewer = g.get("viewer")
+        return {"viewer": viewer, "chama": viewer.chama if viewer else None}
 
     @app.errorhandler(403)
     def forbidden(_):
@@ -52,6 +58,11 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
+        if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite:"):
+            columns = {column["name"] for column in inspect(db.engine).get_columns("member")}
+            if "email" not in columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE member ADD COLUMN email VARCHAR(120)"))
 
     if app.config["SCHEDULER_ENABLED"] and (not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true"):
         from .reminders import start_scheduler

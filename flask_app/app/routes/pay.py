@@ -58,6 +58,9 @@ def pay():
 @bp.route("/receipt/<int:entry_id>")
 def receipt(entry_id):
     entry = db.get_or_404(LedgerEntry, entry_id)
+    if entry.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     return render_template("receipt.html", e=entry)
 
 

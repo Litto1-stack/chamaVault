@@ -48,8 +48,11 @@ def check():
     result = None
     if request.method == "POST":
         member = db.session.get(Member, to_int(request.form.get("member_id"), lo=1) or 0)
+        if member and member.chama_id != g.viewer.chama_id:
+            member = None
         code = (request.form.get("code") or "").strip().upper()
         if member:
             result = hmac.compare_digest(code, statement_code(member, _entries_for(member)))
-    return render_template("statement_check.html", result=result, members=Member.query.all())
+    return render_template("statement_check.html", result=result,
+                           members=Member.query.filter_by(chama_id=g.viewer.chama_id).all())
 

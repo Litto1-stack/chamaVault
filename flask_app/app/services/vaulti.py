@@ -192,5 +192,44 @@ class LlmCoach(VaultiCoach):
             return self.fallback.reply(question, member, lang)
 
 
+class OpenRouterCoach(LlmCoach):
+    """OpenRouter chat completions with the same local FAQ fallback as Together."""
+
+    def _call_api(self, messages) -> str:
+        api_key = current_app.config.get("OPENROUTER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or os.environ.get("API_KEY")
+        base_url = current_app.config.get("OPENROUTER_BASE_URL") or "https://openrouter.ai/api/v1"
+        model = current_app.config.get("OPENROUTER_MODEL") or os.environ.get("OPENROUTER_MODEL") or os.environ.get("MODEL")
+        if not model or model.strip().lower() == "gemini":
+            model = "google/gemini-2.5-flash-lite"
+        if not api_key:
+            raise RuntimeError("OPENROUTER_API_KEY is not configured")
+
+        payload = {"model": model, "messages": messages, "max_tokens": 350, "temperature": 0.4}
+        req = urllib.request.Request(
+            f"{base_url.rstrip('/')}/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://chamavault.app",
+                "X-Title": "ChamaVault",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")[:200]
+            raise RuntimeError(f"OpenRouter HTTP {exc.code}: {body}") from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"OpenRouter unreachable: {exc}") from exc
+
+        try:
+            return data["choices"][0]["message"]["content"].strip()
+        except (KeyError, IndexError, TypeError, AttributeError) as exc:
+            raise RuntimeError("Unexpected OpenRouter response shape") from exc
+
+
 def get_coach() -> VaultiCoach:
     return current_app.extensions["vaulti_coach"]

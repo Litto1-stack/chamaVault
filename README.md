@@ -10,6 +10,8 @@ python -m http.server 8000
 
 Open <http://localhost:8000>. No build step or package install is required.
 
+This command runs the static demo only. To use accounts and the Flask-backed services, follow [flask_app/README.md](flask_app/README.md); the Flask configuration loads the workspace-root `.env` file.
+
 ## Main flow
 
 - Review contribution status and the group total on the dashboard.

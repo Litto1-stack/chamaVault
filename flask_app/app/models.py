@@ -7,6 +7,14 @@ from .timeutil import now_utc
 ROLES = ("treasurer", "signatory", "member")
 
 
+class Account(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), nullable=False, unique=True, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    member_id = db.Column(db.ForeignKey("member.id"), nullable=False, unique=True)
+    member = db.relationship("Member", backref=db.backref("account", uselist=False))
+
+
 class Chama(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)

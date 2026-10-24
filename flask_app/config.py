@@ -1,8 +1,10 @@
 """App configuration: secrets, database, and demo switches (env vars override defaults)."""
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR.parent / ".env", override=False)
 
 
 class Config:
@@ -13,6 +15,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
+    AUTH_REQUIRED = True
 
     TIMEZONE = "Africa/Nairobi"
     SMS_BACKEND = "mock"        # swap for "africastalking" once a real service class exists
@@ -26,6 +30,12 @@ class Config:
     ADAPTION_API_KEY = os.environ.get("ADAPTION_API_KEY", "")
     TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY", "")
     VAULTI_MODEL_ID = os.environ.get("VAULTI_MODEL_ID", "")
+
+    OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("API_KEY", "")
+    OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL") or os.environ.get(
+        "BASE_URL", "https://openrouter.ai/api/v1"
+    )
+    OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL") or os.environ.get("MODEL", "")
 
     # Cognaria Kenyan TTS
     COGNARIA_API_KEY = os.environ.get("COGNARIA_API_KEY", "")
@@ -47,3 +57,4 @@ class TestConfig(Config):
     WTF_CSRF_ENABLED = False
     SCHEDULER_ENABLED = False
     VAULTI_BACKEND = "local"
+    AUTH_REQUIRED = False

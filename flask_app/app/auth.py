@@ -2,21 +2,36 @@
 import re
 from functools import wraps
 
-from flask import abort, g, session
+from flask import abort, current_app, g, redirect, request, session, url_for
 from werkzeug.security import check_password_hash
 
 from .extensions import db
-from .models import Member
+from .models import Account, Member
 
 MAX_PIN_FAILS = 5
 
 
 def load_viewer():
-    """Resolve the demo viewer from the session; default to the first plain member."""
+    """Resolve the signed-in member; keep seeded identity only in test mode."""
     member = db.session.get(Member, session.get("viewer_id") or 0)
-    if member is None:
+    if member is None and not current_app.config.get("AUTH_REQUIRED", True):
         member = Member.query.filter_by(role="member").order_by(Member.id).first() or Member.query.first()
     g.viewer = member
+
+
+def require_account_login():
+    if not current_app.config.get("AUTH_REQUIRED", True):
+        return
+    public_endpoints = {
+        "main.landing", "auth.login", "auth.signup", "auth.logout", "members.join",
+        "info.page", "info.tools", "info.service_worker", "pay.mpesa_webhook",
+    }
+    if request.endpoint == "static" or request.endpoint in public_endpoints:
+        return
+    account = db.session.get(Account, session.get("account_id") or 0)
+    if account is None or g.viewer is None or account.member_id != g.viewer.id:
+        session.clear()
+        return redirect(url_for("auth.login", next=request.full_path))
 
 
 def role_required(*roles):

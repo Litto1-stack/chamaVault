@@ -71,8 +71,7 @@ def start_scheduler(app):
     def run(fn, *args):
         def job():
             with app.app_context():
-                chama = Chama.query.first()
-                if chama:
+                for chama in Chama.query.all():
                     fn(chama, *args)
         return job
 

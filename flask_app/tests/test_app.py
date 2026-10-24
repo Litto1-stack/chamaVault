@@ -1,7 +1,14 @@
 """End-to-end tests of pages, payments, SMS, fraud rules, loans and Vaulti."""
+from app import create_app
 from app.extensions import db
 from app.ledger import verify_chain
-from app.models import Chama, FraudFlag, LedgerEntry, Loan, Member, SmsLog
+from app.models import Account, Chama, FraudFlag, LedgerEntry, Loan, Member, SmsLog
+from config import TestConfig
+from seed import seed_demo
+
+
+class AuthRequiredConfig(TestConfig):
+    AUTH_REQUIRED = True
 
 
 def switch(client, name):
@@ -19,6 +26,51 @@ def test_every_page_renders(client):
     for path in ["/ledger", "/verify", "/pay", "/sms", "/reminders", "/loans", "/score", "/statement",
                  "/statement/check", "/vaulti", "/demo"]:
         assert client.get(path).status_code == 200, path
+
+
+def test_auth_gate_signup_login_and_logout():
+    app = create_app(AuthRequiredConfig)
+    with app.app_context():
+        seed_demo()
+    client = app.test_client()
+
+    assert client.get("/").status_code == 200
+    protected = client.get("/ledger")
+    assert protected.status_code == 302 and "/login" in protected.headers["Location"]
+
+    data = {
+        "name": "Test Treasurer", "email": "test@example.com", "phone": "0712999999",
+        "chama_name": "Test Chama", "password": "password123", "password_confirm": "password123",
+        "pin": "9876", "pin_confirm": "9876",
+    }
+    created = client.post("/signup", data=data)
+    assert created.status_code == 302 and "/dashboard" in created.headers["Location"], created.get_data(as_text=True)
+    assert client.get("/ledger").status_code == 200
+
+    client.post("/logout")
+    assert client.get("/ledger").status_code == 302
+    logged_in = client.post("/login", data={"email": "test@example.com", "password": "password123"})
+    assert logged_in.status_code == 302
+    assert client.get("/dashboard").status_code == 200
+
+
+def test_signup_claims_existing_member_using_transaction_pin():
+    app = create_app(AuthRequiredConfig)
+    with app.app_context():
+        seed_demo()
+        Account.query.delete()
+        db.session.commit()
+        chama_count = Chama.query.count()
+    client = app.test_client()
+    response = client.post("/signup", data={
+        "name": "Wanjiku Kamau", "email": "wanjiku-new@example.com", "phone": "0712000001",
+        "chama_name": "Existing group", "password": "password123", "password_confirm": "password123",
+        "pin": "1234", "pin_confirm": "1234",
+    })
+    assert response.status_code == 302 and "/dashboard" in response.headers["Location"]
+    with app.app_context():
+        assert Account.query.filter_by(email="wanjiku-new@example.com").one().member.name == "Wanjiku Kamau"
+        assert Chama.query.count() == chama_count
 
 
 def test_mpesa_payment_updates_ledger_and_texts_everyone(client):

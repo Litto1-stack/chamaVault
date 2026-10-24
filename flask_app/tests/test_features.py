@@ -1,4 +1,7 @@
 """Tests for loan rules, merry-go-round, elections, invites, settings, charts and exports."""
+import json
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from app import charts, rotation
@@ -8,11 +11,31 @@ from app.loans import LoanError, available_pool, cast_vote as loan_vote, loan_te
 from app.models import Chama, Election, Invite, LedgerEntry, Loan, Member, RotationSlot, SmsLog
 from app.payments import period_of, record_payment
 from app.stats import chama_stats
+from app.services.vaulti import LocalFaqCoach, OpenRouterCoach
 from app.timeutil import today_nairobi
 
 
 def member(name):
     return Member.query.filter_by(name=name).one()
+
+
+def test_openrouter_uses_configured_chat_completions(app):
+    response = MagicMock()
+    response.__enter__.return_value.read.return_value = (
+        b'{"choices":[{"message":{"content":"A simple budget starts with a plan."}}]}'
+    )
+    with app.app_context():
+        app.config.update(
+            OPENROUTER_API_KEY="test-key", OPENROUTER_BASE_URL="https://openrouter.ai/api/v1",
+            OPENROUTER_MODEL="google/gemini-2.5-flash-lite",
+        )
+        with patch("app.services.vaulti.urllib.request.urlopen", return_value=response) as urlopen:
+            answer = OpenRouterCoach(LocalFaqCoach())._call_api([{"role": "user", "content": "budget"}])
+        request = urlopen.call_args.args[0]
+        assert request.full_url == "https://openrouter.ai/api/v1/chat/completions"
+        assert json.loads(request.data)["model"] == "google/gemini-2.5-flash-lite"
+        assert request.get_header("Authorization") == "Bearer test-key"
+        assert answer == "A simple budget starts with a plan."
 
 
 def test_loan_terms_flat_and_reducing():

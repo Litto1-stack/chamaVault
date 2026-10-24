@@ -13,6 +13,8 @@ python -m venv .venv
 .\.venv\Scripts\python -m pytest   # 42 tests
 ```
 
+The public landing page is `/`; create an account to create a chama, or sign in with a seeded demo account such as `demo+0001@chamavault.local` / `Demo1234` (transaction PIN `1234`). Set `API_KEY` in the workspace-root `.env` to enable Vaulti through OpenRouter. `BASE_URL` defaults to OpenRouter's API and `MODEL` defaults to `google/gemini-2.5-flash-lite`; Vaulti falls back to the local FAQ if the provider is unavailable.
+
 ## Try it (use the "Viewing as" dropdown)
 
 | Try | As | Where |

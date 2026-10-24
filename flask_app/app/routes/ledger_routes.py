@@ -6,7 +6,7 @@ from ..auth import check_pin, role_required
 from ..extensions import db
 from ..forms import to_int
 from ..ledger import LedgerError, correct_entry, corrections_by_original, verify_chain
-from ..models import Chama, LedgerEntry
+from ..models import LedgerEntry
 from ..services.sms import notify_all
 from ..timeutil import kes
 
@@ -15,7 +15,7 @@ bp = Blueprint("ledger", __name__)
 
 @bp.route("/ledger")
 def ledger():
-    chama = Chama.query.first()
+    chama = g.viewer.chama
     entries = (LedgerEntry.query.filter_by(chama_id=chama.id)
                .order_by(LedgerEntry.id.desc()).limit(150).all())
     return render_template("ledger.html", entries=entries, corrections=corrections_by_original(chama.id))
@@ -23,7 +23,7 @@ def ledger():
 
 @bp.route("/verify")
 def verify():
-    chama = Chama.query.first()
+    chama = g.viewer.chama
     return render_template("verify.html", result=verify_chain(chama.id))
 
 
@@ -31,6 +31,9 @@ def verify():
 @role_required("treasurer")
 def correct(entry_id):
     entry = db.get_or_404(LedgerEntry, entry_id)
+    if entry.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     if request.method == "POST":
         new_amount = to_int(request.form.get("new_amount"), lo=-1_000_000, hi=1_000_000)
         error = check_pin(g.viewer, request.form.get("pin"))

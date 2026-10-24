@@ -36,6 +36,9 @@ def open_():
 @bp.post("/elections/<int:election_id>/vote")
 def vote(election_id):
     election = db.get_or_404(Election, election_id)
+    if election.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     try:
         cast_vote(election, g.viewer, to_int(request.form.get("candidate"), lo=1) or 0)
         flash("Your secret vote was counted.", "ok")
@@ -48,6 +51,9 @@ def vote(election_id):
 @role_required("signatory")
 def close(election_id):
     election = db.get_or_404(Election, election_id)
+    if election.chama_id != g.viewer.chama_id:
+        from flask import abort
+        abort(404)
     try:
         winner = close_election(election, g.viewer)
         flash(f"{winner.name} is the new treasurer.", "ok")

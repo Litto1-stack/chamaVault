@@ -1,5 +1,5 @@
 """Home dashboard, demo 'Viewing as' switch, and the signatory alerts page."""
-from flask import Blueprint, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, current_app, g, redirect, render_template, request, session, url_for
 
 from ..auth import role_required
 from ..extensions import db
@@ -15,8 +15,15 @@ bp = Blueprint("main", __name__)
 
 
 @bp.route("/")
+def landing():
+    if not current_app.config.get("AUTH_REQUIRED", True):
+        return dashboard()
+    return render_template("landing.html")
+
+
+@bp.route("/dashboard")
 def dashboard():
-    chama = Chama.query.first()
+    chama = g.viewer.chama if g.viewer else Chama.query.first()
     if chama is None:
         return render_template("error.html", title="No data yet",
                                message="Run 'python seed.py' in the flask_app folder, then refresh."), 200
@@ -40,6 +47,8 @@ def dashboard():
 
 @bp.post("/viewer")
 def switch_viewer():
+    if current_app.config.get("AUTH_REQUIRED", True):
+        abort(404)
     member_id = to_int(request.form.get("member_id"), lo=1)
     if member_id and db.session.get(Member, member_id):
         session["viewer_id"] = member_id
@@ -51,6 +60,6 @@ def switch_viewer():
 @bp.route("/alerts")
 @role_required("signatory")
 def alerts():
-    flags = FraudFlag.query.order_by(FraudFlag.id.desc()).limit(50).all()
+    flags = FraudFlag.query.filter_by(chama_id=g.viewer.chama_id).order_by(FraudFlag.id.desc()).limit(50).all()
     return render_template("alerts.html", flags=flags)
 
