@@ -146,7 +146,7 @@ def test_non_treasurer_cannot_open_settings_or_invite(client):
 
 
 def test_new_pages_render(client):
-    for path in ["/elections", "/rotation", "/tools", "/info/how-it-works", "/info/features", "/info/faq",
+    for path in ["/elections", "/rotation", "/tools", "/goals", "/info/how-it-works", "/info/features", "/info/faq",
                  "/info/privacy", "/info/terms", "/sw.js", "/static/manifest.webmanifest", "/ledger.csv", "/loans"]:
         assert client.get(path).status_code == 200, path
     assert client.get("/info/nope").status_code == 404

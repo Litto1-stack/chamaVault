@@ -31,7 +31,10 @@ def settings():
 def invite():
     if request.method == "POST":
         try:
-            inv = create_invite(g.viewer.chama, request.form.get("name"), request.form.get("phone"), request.host_url)
+            inv = create_invite(
+                g.viewer.chama, request.form.get("name"), request.form.get("phone"),
+                request.host_url, email=request.form.get("email"),
+            )
             flash(f"Invite sent to {inv.name}. Open the SMS outbox to see the link.", "ok")
             return redirect(url_for("members.invite"))
         except MemberError as exc:

@@ -10,7 +10,7 @@ from app import create_app
 from app import scoring
 from app.extensions import db
 from app.ledger import append_entry
-from app.models import Chama, Loan, LoanVote, Member, RotationSlot
+from app.models import Chama, Loan, LoanVote, Member, PersonalGoal, RotationSlot
 from app.payments import group_sms_text, period_of
 from app.services.sms import notify_all
 from app.timeutil import nairobi_to_utc, today_nairobi
@@ -107,6 +107,26 @@ def seed_demo(today: date | None = None):
                           ("Grace Wambui", True), ("Achieng Otieno", False)):
         db.session.add(LoanVote(loan_id=loan.id, member_id=members[name].id, approve=approve,
                                 created_at=at_ten(payout_day - timedelta(days=3))))
+
+    # Demo emails + personal goals for Vaulti / Resend digests
+    members["Wanjiku Kamau"].email = "wanjiku@example.com"
+    members["Mary Njeri"].email = "mary@example.com"
+    db.session.add(PersonalGoal(
+        member_id=members["Wanjiku Kamau"].id,
+        name="School fees",
+        target_kes=30_000,
+        saved_kes=6_000,
+        monthly_pledge=4_000,
+        target_date=add_months(today, 6),
+    ))
+    db.session.add(PersonalGoal(
+        member_id=members["Achieng Otieno"].id,
+        name="Emergency fund",
+        target_kes=15_000,
+        saved_kes=2_000,
+        monthly_pledge=1_500,
+        target_date=add_months(today, 10),
+    ))
     db.session.commit()
 
 

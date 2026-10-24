@@ -21,6 +21,24 @@
   <div class="tile"><span class="t-label">Active loans</span><span class="t-num">{{ stats.active_loans }}</span></div>
 </div>
 
+{% if personal_goals %}
+<section class="card">
+  <h2>Your savings goals</h2>
+  <ul class="list">
+    {% for goal, plan in personal_goals %}
+    <li>
+      <div><strong>{{ goal.name }}</strong><br>
+        <span class="sub">{{ goal.saved_kes|kes }} / {{ goal.target_kes|kes }} · {{ plan.pct }}%</span></div>
+      <a class="btn small ghost" href="{{ url_for('goals.goals') }}">Open</a>
+    </li>
+    {% endfor %}
+  </ul>
+  <a class="btn small" href="{{ url_for('goals.goals') }}">Manage goals</a>
+</section>
+{% else %}
+<p class="muted"><a href="{{ url_for('goals.goals') }}">Set a personal savings goal</a> — Vaulti can help with the monthly math.</p>
+{% endif %}
+
 <section class="card">
   <h2>This month's contributions</h2>
   <ul class="list">

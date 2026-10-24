@@ -1,4 +1,4 @@
-"""Database models: Chama, Member, LedgerEntry, Loan, LoanVote, SmsLog, ScoreEvent, FraudFlag."""
+"""Database models: Chama, Member, LedgerEntry, Loan, LoanVote, SmsLog, ScoreEvent, FraudFlag, PersonalGoal."""
 from sqlalchemy import event
 
 from .extensions import db
@@ -21,6 +21,7 @@ class Chama(db.Model):
     require_guarantor = db.Column(db.Boolean, nullable=False, default=False)
     rotation_amount = db.Column(db.Integer, nullable=False, default=0)   # merry-go-round: KES per member per month (0 = off)
     rotation_start = db.Column(db.String(7))                             # "YYYY-MM" of the first cycle
+    is_solo = db.Column(db.Boolean, nullable=False, default=False)       # single-person savings vault
     members = db.relationship("Member", backref="chama", order_by="Member.id")
 
 
@@ -29,6 +30,7 @@ class Member(db.Model):
     chama_id = db.Column(db.ForeignKey("chama.id"), nullable=False)
     name = db.Column(db.String(80), nullable=False)
     phone = db.Column(db.String(15), unique=True, nullable=False)  # 2547XXXXXXXX
+    email = db.Column(db.String(120))                              # optional; Resend notifications
     role = db.Column(db.String(12), nullable=False, default="member")
     pin_hash = db.Column(db.String(255), nullable=False)
     credit_score = db.Column(db.Integer, nullable=False, default=500)
@@ -144,6 +146,7 @@ class Invite(db.Model):
     code = db.Column(db.String(24), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
+    email = db.Column(db.String(120))
     used = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, nullable=False, default=now_utc)
 
@@ -180,4 +183,18 @@ class ElectionVote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     election_id = db.Column(db.ForeignKey("election.id"), nullable=False)
     candidate_id = db.Column(db.ForeignKey("candidate.id"), nullable=False)
+
+
+class PersonalGoal(db.Model):
+    """Member-owned savings target (separate from the chama pool goal)."""
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.ForeignKey("member.id"), nullable=False, index=True)
+    name = db.Column(db.String(80), nullable=False)
+    target_kes = db.Column(db.Integer, nullable=False)
+    saved_kes = db.Column(db.Integer, nullable=False, default=0)
+    monthly_pledge = db.Column(db.Integer, nullable=False, default=0)
+    target_date = db.Column(db.Date)
+    created_at = db.Column(db.DateTime, nullable=False, default=now_utc)
+
+    member = db.relationship("Member", backref="personal_goals")
 

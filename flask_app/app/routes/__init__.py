@@ -1,5 +1,6 @@
 """Collects every route blueprint for the app factory."""
 from .election_routes import bp as elections_bp
+from .goals_routes import bp as goals_bp
 from .info_routes import bp as info_bp
 from .ledger_routes import bp as ledger_bp
 from .loans_routes import bp as loans_bp
@@ -12,4 +13,4 @@ from .sms_routes import bp as sms_bp
 from .vaulti_routes import bp as vaulti_bp
 
 all_blueprints = [main_bp, ledger_bp, pay_bp, sms_bp, loans_bp, score_bp, vaulti_bp,
-                  elections_bp, rotation_bp, members_bp, info_bp]
+                  elections_bp, rotation_bp, members_bp, info_bp, goals_bp]

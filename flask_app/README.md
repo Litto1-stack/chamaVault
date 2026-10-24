@@ -48,9 +48,20 @@ python -m venv .venv
 - `services/sms.py`, `mpesa.py`, `card.py` mock services behind interfaces · `services/vaulti.py` + `vaulti_faq.py` coach and FAQ
 - `routes/` one blueprint per area · `templates/` Jinja pages · `static/` CSS and JS
 
+## Vaulti literacy (Adaption + Together) · voice · email
+
+1. Copy `.env.example` keys into your environment (or export them).
+2. Build training data: `python literacy/scripts/build_dataset.py`
+3. Train on Adaption: `ADAPTION_API_KEY=… python literacy/scripts/train_adaption.py`  
+   Default model `openai/gpt-oss-20b`; promote with `--model Qwen/Qwen3.6-35B-A3B`.
+4. Host the LoRA on Together AI; set `TOGETHER_API_KEY`, `VAULTI_MODEL_ID`, `VAULTI_BACKEND=llm`.
+5. Optional: `COGNARIA_API_KEY` for Kenyan TTS on Vaulti; `RESEND_API_KEY` + `EMAIL_FROM` for invites/reminders/goal digests.
+
+Vaulti teaches literacy (EN/SW), grounds answers with `literacy/docs/`, and refuses guaranteed-return / pick-a-stock advice.
+
 ## Swapping in real services later
 
-Set the service in `app/__init__.py`: implement `SmsService.send` (Africa's Talking), `MpesaService.stk_push/complete` (Daraja), and fill `LlmCoach._call_api` (then set `VAULTI_BACKEND = "llm"`).
+Set the service in `app/__init__.py`: implement `SmsService.send` (Africa's Talking), `MpesaService.stk_push/complete` (Daraja). LLM path is already wired via Together when `VAULTI_BACKEND=llm`.
 
 ## Notes
 

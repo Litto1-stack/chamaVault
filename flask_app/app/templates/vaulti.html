@@ -2,23 +2,28 @@
 {% block title %}Vaulti{% endblock %}
 {% block content %}
 <div class="row" style="justify-content: space-between">
-  <h1>{{ '🤖 Vaulti, your money coach' if lang == 'en' else '🤖 Vaulti, kocha wako wa pesa' }}</h1>
+  <h1>{{ 'Vaulti, your money coach' if lang == 'en' else 'Vaulti, kocha wako wa pesa' }}</h1>
   <div class="row"><a class="btn small {{ 'ghost' if lang != 'en' }}" href="{{ url_for('vaulti.vaulti', lang='en') }}">English</a>
     <a class="btn small {{ 'ghost' if lang != 'sw' }}" href="{{ url_for('vaulti.vaulti', lang='sw') }}">Kiswahili</a></div>
 </div>
-<p class="muted small">{{ 'I teach money basics using your real score and streak. Education only, not financial advice.' if lang == 'en' else 'Nafundisha misingi ya pesa kwa kutumia alama na msururu wako halisi. Elimu tu, si ushauri wa kifedha.' }}</p>
+<p class="muted small">{{ 'I teach money basics using your real score, streak, and goals. Kenyan voice available. Education only, not financial advice.' if lang == 'en' else 'Nafundisha misingi ya pesa kwa kutumia alama, msururu na malengo yako. Sauti ya Kenya inapatikana. Elimu tu, si ushauri wa kifedha.' }}</p>
 
 <div class="chat" id="chat-log" aria-live="polite">
-  <div class="bubble bot">{{ 'Hi ' ~ viewer.first_name ~ '! Ask me about budgeting, saving, loans, scams, or your score.' if lang == 'en' else 'Habari ' ~ viewer.first_name ~ '! Niulize kuhusu bajeti, akiba, mikopo, ulaghai, au alama yako.' }}</div>
+  <div class="bubble bot">{{ 'Hi ' ~ viewer.first_name ~ '! Ask me about budgeting, saving goals, IPOs, scams, or your score.' if lang == 'en' else 'Habari ' ~ viewer.first_name ~ '! Niulize kuhusu bajeti, malengo, IPO, ulaghai, au alama yako.' }}</div>
   {% if question %}<div class="bubble me">{{ question }}</div>{% endif %}
-  {% if answer %}<div class="bubble bot">{{ answer.answer }}</div>{% endif %}
+  {% if answer %}
+  <div class="bubble bot" data-speakable>{{ answer.answer }}</div>
+  {% endif %}
 </div>
+<audio id="vaulti-audio" class="hidden" controls style="width:100%;margin:8px 0"></audio>
+<p id="tts-status" class="muted small" hidden></p>
 
 <div class="chips no-print" style="margin-bottom:12px">
   {% for s in suggestions %}<button type="button" class="chip" data-ask="{{ s }}">{{ s }}</button>{% endfor %}
 </div>
 
-<form id="vaulti-form" method="post" action="{{ url_for('vaulti.vaulti') }}" class="card" autocomplete="off">
+<form id="vaulti-form" method="post" action="{{ url_for('vaulti.vaulti') }}" class="card" autocomplete="off"
+      data-speak-url="{{ url_for('vaulti.speak') }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="lang" value="{{ lang }}">
   <label for="question">{{ 'Your question' if lang == 'en' else 'Swali lako' }}</label>

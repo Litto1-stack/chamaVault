@@ -59,7 +59,72 @@
   const chat = document.getElementById('vaulti-form');
   if (chat) {
     const log = document.getElementById('chat-log');
-    const add = (cls, text) => { const d = document.createElement('div'); d.className = 'bubble ' + cls; d.textContent = text; log.appendChild(d); d.scrollIntoView({ block: 'nearest' }); };
+    const audio = document.getElementById('vaulti-audio');
+    const ttsStatus = document.getElementById('tts-status');
+    const speakUrl = chat.dataset.speakUrl;
+
+    const playBtn = (text) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn small ghost vaulti-play';
+      b.textContent = 'Play (Kenyan voice)';
+      b.addEventListener('click', async () => {
+        if (!speakUrl) return;
+        b.disabled = true;
+        if (ttsStatus) { ttsStatus.hidden = false; ttsStatus.textContent = 'Preparing voice…'; }
+        try {
+          const res = await fetch(speakUrl, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRFToken': csrf() },
+            body: new URLSearchParams({ text: text, lang: chat.elements.lang.value }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'TTS failed');
+          if (data.mock || !data.audio_url) {
+            if (ttsStatus) ttsStatus.textContent = data.message || 'Add COGNARIA_API_KEY for Kenyan voice.';
+            return;
+          }
+          if (audio) {
+            audio.classList.remove('hidden');
+            audio.src = data.audio_url;
+            audio.play().catch(() => {});
+          }
+          if (ttsStatus) ttsStatus.textContent = '';
+        } catch (err) {
+          if (ttsStatus) ttsStatus.textContent = err.message || 'Could not play voice.';
+        } finally {
+          b.disabled = false;
+        }
+      });
+      return b;
+    };
+
+    const add = (cls, text) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'bubble-wrap';
+      const d = document.createElement('div');
+      d.className = 'bubble ' + cls;
+      d.textContent = text;
+      wrap.appendChild(d);
+      if (cls === 'bot') {
+        d.setAttribute('data-speakable', '');
+        wrap.appendChild(playBtn(text));
+      }
+      log.appendChild(wrap);
+      wrap.scrollIntoView({ block: 'nearest' });
+    };
+
+    // Play button for server-rendered last answer
+    log.querySelectorAll('.bubble.bot[data-speakable]').forEach((el) => {
+      if (!el.parentElement.querySelector('.vaulti-play')) {
+        const wrap = document.createElement('div');
+        wrap.className = 'bubble-wrap';
+        el.parentNode.insertBefore(wrap, el);
+        wrap.appendChild(el);
+        wrap.appendChild(playBtn(el.textContent));
+      }
+    });
+
     const ask = async (q) => {
       add('me', q);
       try {

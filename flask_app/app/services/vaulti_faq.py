@@ -53,9 +53,12 @@ FAQ = {
 }
 
 # Questions that ask for a specific investment recommendation: we educate, we do not advise.
+# Soft triggers route to an explainer (frameworks + grounding); hard refusals live in vaulti.py.
 ADVICE_TRIGGERS = ["which stock", "what stock", "should i buy", "should i invest", "best investment",
+                   "good investment", "good to invest", "selling shares", "share offer", "ipo",
                    "where should i invest", "guaranteed return", "buy bitcoin", "crypto",
-                   "nunue hisa", "wekeza wapi", "uwekeze wapi", "nifanye uwekezaji", "hisa gani"]
+                   "nunue hisa", "wekeza wapi", "uwekeze wapi", "nifanye uwekezaji", "hisa gani",
+                   "dangote"]
 
 NO_ADVICE = {
     "en": "I can teach you how investing works, but I can't recommend specific investments. That needs a licensed adviser, because the right choice depends on your whole situation. Check that anyone advising you is licensed by the Capital Markets Authority. Ask me about money market funds, compound interest or SACCOs and I'll explain the basics.",

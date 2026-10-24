@@ -7,7 +7,8 @@
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label for="name">Full name</label><input id="name" name="name" maxlength="80" required value="{{ request.form.get('name', '') }}">
   <label for="phone">Phone number</label><input id="phone" name="phone" inputmode="tel" placeholder="0712 345 678" required value="{{ request.form.get('phone', '') }}">
-  <button class="btn block" style="margin-top:14px">Send invite SMS</button>
+  <label for="email">Email (optional)</label><input id="email" name="email" type="email" placeholder="name@example.com" value="{{ request.form.get('email', '') }}">
+  <button class="btn block" style="margin-top:14px">Send invite</button>
 </form>
 {% if pending %}<section class="card"><h2>Waiting to join</h2><ul class="list">
   {% for i in pending %}<li><div>{{ i.name }}<br><span class="sub">{{ i.phone }}</span></div><a class="small" href="{{ url_for('members.join', code=i.code) }}">Open link</a></li>{% endfor %}</ul></section>{% endif %}

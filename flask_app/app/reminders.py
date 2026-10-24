@@ -38,7 +38,15 @@ def send_reminders(chama, kind, force=False, today=None):
         return 0
     targets = [m for m in chama.members
                if KINDS[kind][1] == "everyone" or member_status(m, today)["status"] != "paid"]
-    notify_members(targets, _message(kind, chama), f"reminder")
+    body = _message(kind, chama)
+    notify_members(targets, body, f"reminder")
+    try:
+        from .services.email import reminder_email
+        for m in targets:
+            if m.email:
+                reminder_email(m.email, chama.name, body)
+    except Exception:
+        pass
     db.session.commit()
     return len(targets)
 

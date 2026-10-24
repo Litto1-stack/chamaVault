@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}My goals{% endblock %}
+{% block content %}
+<h1>My savings goals</h1>
+<p class="muted">Personal targets separate from the chama pool. Vaulti uses these for simple “can I reach it?” math — education only, not investment advice.</p>
+
+<form method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="action" value="create">
+  <h2>New goal</h2>
+  <label for="name">Name</label>
+  <input id="name" name="name" maxlength="80" required placeholder="School fees">
+  <label for="target_kes">Target (KES)</label>
+  <input id="target_kes" name="target_kes" inputmode="numeric" required placeholder="30000">
+  <label for="saved_kes">Already saved (KES)</label>
+  <input id="saved_kes" name="saved_kes" inputmode="numeric" value="0">
+  <label for="monthly_pledge">Monthly pledge (KES)</label>
+  <input id="monthly_pledge" name="monthly_pledge" inputmode="numeric" required placeholder="5000">
+  <label for="target_date">Target date (optional)</label>
+  <input id="target_date" name="target_date" type="date">
+  <button class="btn block" style="margin-top:14px">Save goal</button>
+</form>
+
+{% for goal, plan in rows %}
+<section class="card">
+  <h2>{{ goal.name }}</h2>
+  <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ plan.pct }}"><span style="width: {{ plan.pct }}%"></span></div>
+  <p>{{ goal.saved_kes|kes }} / {{ goal.target_kes|kes }} · {{ plan.pct }}%
+    {% if goal.target_date %} · by {{ goal.target_date.isoformat() }}{% endif %}
+  </p>
+  <p class="muted small">
+    Remaining {{ plan.remaining|kes }}.
+    {% if plan.months_needed is not none %}About {{ plan.months_needed }} month{{ 's' if plan.months_needed != 1 }} at {{ goal.monthly_pledge|kes }}/mo.{% endif %}
+    {% if plan.deadline_months is not none and not plan.on_track %}
+      <strong>Behind deadline</strong> — try about {{ plan.suggested_pledge|kes }}/mo, or extend the date.
+    {% elif plan.on_track and plan.deadline_months is not none %}
+      On track for your date.
+    {% endif %}
+  </p>
+  <form method="post" class="row" style="gap:8px;flex-wrap:wrap;align-items:end" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="goal_id" value="{{ goal.id }}">
+    <input type="hidden" name="action" value="progress">
+    <div><label for="amt-{{ goal.id }}">Add progress</label>
+      <input id="amt-{{ goal.id }}" name="amount" inputmode="numeric" required placeholder="1000" style="width:7rem"></div>
+    <button class="btn small">Add</button>
+  </form>
+  <form method="post" style="margin-top:8px" onsubmit="return confirm('Remove this goal?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="goal_id" value="{{ goal.id }}">
+    <input type="hidden" name="action" value="delete">
+    <button class="btn small ghost" type="submit">Remove</button>
+  </form>
+</section>
+{% else %}
+<p class="muted">No personal goals yet. Add one above, then ask Vaulti “Can I save KES 30,000 in 6 months?”</p>
+{% endfor %}
+
+{% if rows %}
+<form method="post" class="card" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="action" value="email_digest">
+  <h2>Email my goals</h2>
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" value="{{ viewer.email or '' }}" placeholder="you@example.com" required>
+  <button class="btn block" style="margin-top:12px">Send digest (Resend)</button>
+</form>
+{% endif %}
+{% endblock %}

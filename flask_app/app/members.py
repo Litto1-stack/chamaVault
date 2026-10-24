@@ -48,21 +48,28 @@ def update_rules(chama, form, actor):
     db.session.commit()
 
 
-def create_invite(chama, name, raw_phone, base_url):
+def create_invite(chama, name, raw_phone, base_url, email=None):
     name = (name or "").strip()
     phone = normalize_phone(raw_phone)
+    email = (email or "").strip() or None
     if not 2 <= len(name) <= 80:
         raise MemberError("Enter the person's name.")
     if phone is None:
         raise MemberError("Enter a valid Kenyan phone number, like 0712 345 678.")
+    if email and ("@" not in email or len(email) > 120):
+        raise MemberError("Enter a valid email address, or leave it blank.")
     if Member.query.filter_by(phone=phone).first():
         raise MemberError("That phone number is already in the chama.")
-    invite = Invite(chama_id=chama.id, code=secrets.token_urlsafe(8), name=name, phone=phone)
+    invite = Invite(chama_id=chama.id, code=secrets.token_urlsafe(8), name=name, phone=phone, email=email)
     db.session.add(invite)
+    join_url = f"{base_url}join/{invite.code}"
     # No member row exists yet, so the invite SMS goes straight to the outbox with the number.
     db.session.add(SmsLog(to_phone=phone, kind="invite",
-                          body=f"Hi {name.split()[0]}, you are invited to join {chama.name} on ChamaVault: {base_url}join/{invite.code}"))
+                          body=f"Hi {name.split()[0]}, you are invited to join {chama.name} on ChamaVault: {join_url}"))
     db.session.commit()
+    if email:
+        from .services.email import invite_email
+        invite_email(email, name, chama.name, join_url)
     return invite
 
 
@@ -74,8 +81,8 @@ def accept_invite(invite, pin, pin_confirm):
     if Member.query.filter_by(phone=invite.phone).first():
         raise MemberError("That phone number is already in the chama.")
     chama = db.session.get(Chama, invite.chama_id)
-    member = Member(chama_id=chama.id, name=invite.name, phone=invite.phone, role="member",
-                    pin_hash=generate_password_hash(pin))
+    member = Member(chama_id=chama.id, name=invite.name, phone=invite.phone, email=invite.email,
+                    role="member", pin_hash=generate_password_hash(pin))
     db.session.add(member)
     db.session.flush()
     invite.used = True

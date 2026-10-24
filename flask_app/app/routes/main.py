@@ -24,13 +24,17 @@ def dashboard():
     balance = pool_balance(chama.id)
     rows = [(m, member_status(m, today)) for m in chama.members]
     recent = (LedgerEntry.query.filter_by(chama_id=chama.id).order_by(LedgerEntry.id.desc()).limit(5).all())
+    from ..goals import member_goals, plan_goal
+    personal = []
+    for goal in member_goals(g.viewer.id)[:2]:
+        personal.append((goal, plan_goal(goal.target_kes, goal.saved_kes, goal.monthly_pledge, goal.target_date)))
     return render_template(
         "dashboard.html", balance=balance, goal=chama.goal_amount,
         pct=min(100, round(balance * 100 / chama.goal_amount)) if chama.goal_amount else 0,
         rows=rows, recent=recent, loan=active_loan(g.viewer), chain=verify_chain(chama.id),
         mine=member_status(g.viewer, today), today=today, stats=chama_stats(chama, today),
         pot=rotation.pot_status(chama, period_of(today)) if chama.rotation_amount else None,
-        held=rotation.held(chama.id),
+        held=rotation.held(chama.id), personal_goals=personal,
     )
 
 

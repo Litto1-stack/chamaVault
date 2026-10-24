@@ -66,6 +66,8 @@ input[readonly] { background: var(--bg); color: var(--muted); }
 .chat { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
 .bubble { padding: 12px 14px; border-radius: 16px; max-width: 92%; white-space: pre-wrap; }
 .bubble.me { align-self: flex-end; background: var(--green); color: #fff; } .bubble.bot { background: var(--card); border: 1px solid var(--line); }
+.bubble-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: 92%; }
+.bubble-wrap .vaulti-play { align-self: flex-start; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; } .chip { border: 1.5px solid var(--green); color: var(--green); background: transparent; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: .85rem; }
 .sms { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin: 8px 0; }
 .sms .meta { color: var(--muted); font-size: .78rem; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }

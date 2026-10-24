@@ -29,7 +29,7 @@
 {% if viewer %}
 <nav class="pills" aria-label="Main">
   {% set links = [('main.dashboard','Home'),('ledger.ledger','Ledger'),('pay.pay','Pay'),('loans.loans','Loans'),('rotation.rotation','Merry-go-round'),
-                  ('score.score','My score'),('vaulti.vaulti','Vaulti'),('sms.outbox','SMS'),('sms.reminders','Reminders'),
+                  ('score.score','My score'),('goals.goals','My goals'),('vaulti.vaulti','Vaulti'),('sms.outbox','SMS'),('sms.reminders','Reminders'),
                   ('ledger.verify','Verify'),('elections.elections','Elections'),('info.tools','Calculators'),('pay.demo','M-Pesa demo')] %}
   {% for ep, label in links %}<a href="{{ url_for(ep) }}" class="{{ 'on' if request.endpoint == ep }}">{{ label }}</a>{% endfor %}
   {% if viewer.role == 'treasurer' %}<a href="{{ url_for('members.invite') }}" class="{{ 'on' if request.endpoint == 'members.invite' }}">Invite</a><a href="{{ url_for('members.settings') }}" class="{{ 'on' if request.endpoint == 'members.settings' }}">Rules</a><a href="{{ url_for('pay.cash') }}" class="{{ 'on' if request.endpoint == 'pay.cash' }}">Record cash</a>{% endif %}
